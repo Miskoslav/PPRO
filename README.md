@@ -159,14 +159,17 @@ erDiagram
 
 ---
 
-## 🛠️ 5. Technologický stack
+## 🛠️ 5. Technologický stack (Potvrzeno)
 
-Systém bude postaven na moderním, robustním a typovém stacku splňujícím veškerá akademická i průmyslová kritéria:
-- **Backend / API:** .NET 8 (C#) / ASP.NET Core Web API *nebo* Java 21 Spring Boot *nebo* TypeScript (Node.js/NestJS). *(Bude potvrzeno uživatelem dle preferencí)*.
+Systém je postaven na moderním, robustním a typovém stacku splňujícím veškerá akademická i průmyslová kritéria PPRO:
+- **Jazyk & Runtime:** Java 21+ (Java 25 LTS).
+- **Backend / Aplikační rámec:** Spring Boot 3.x (Spring Web, Spring Data JPA, Jakarta Validation).
 - **Databáze:** PostgreSQL 16 (běžící v Dockeru).
-- **ORM & Migrace:** Entity Framework Core / Flyway / Prisma / Liquibase.
-- **Frontend / UI:** Webové responzivní rozhraní přizpůsobené pro desktop i skladový mobil.
-- **Kontejnerizace:** Docker & Docker Compose.
+- **Databázové migrace:** Flyway (verzované SQL skripty `V1__...`, `V2__...`).
+- **Dokumentace API:** SpringDoc OpenAPI 3 / Swagger UI (`/swagger-ui.html`).
+- **Frontend / Demo rozhraní:** Webové responzivní rozhraní pro skladníka i klienta (`src/main/resources/static`).
+- **Kontejnerizace:** Docker & Docker Compose (`docker compose up --build`).
+- **Implementační plán:** Kompletní plán s odškrtávacím seznamem je v souboru [IMPLEMENTATION_PLAN.md](file:///u:/PPRO/PPRO/IMPLEMENTATION_PLAN.md).
 
 ---
 
@@ -174,6 +177,7 @@ Systém bude postaven na moderním, robustním a typovém stacku splňujícím v
 
 ### Prerekvizity:
 - Docker Desktop & Docker Compose
+- Java 21+ (na vývojovém stroji)
 - Git
 
 ### Spuštění celého projektu:
@@ -194,3 +198,6 @@ Aplikace a databáze automaticky naběhnou, proběhnou migrace a databáze se na
   - Vytvoření kompletní technické dokumentace a řešení všech 5 otevřených bodů zadání v [README.md](file:///u:/PPRO/PPRO/README.md).
   - Anonymizace a odstranění osobních údajů a e-mailových adres z dokumentace a konfiguračních souborů.
   - Doplnění Zásady 1b do [AGENTS.md](file:///u:/PPRO/PPRO/AGENTS.md) o povinnosti detailních, strukturovaných a vypovídajících commit zpráv.
+  - Zvolen technologický stack: **Java (Spring Boot 3) + PostgreSQL + Flyway + Docker Compose**.
+  - Doplnění Zásad 7 a 8 do [AGENTS.md](file:///u:/PPRO/PPRO/AGENTS.md) (důsledné komentování kódu a správa úkolů přes odškrtávací seznam).
+  - Vytvořen kompletní [IMPLEMENTATION_PLAN.md](file:///u:/PPRO/PPRO/IMPLEMENTATION_PLAN.md) přímo v projektu pro Milestone 1 (demo entity `Product`).

@@ -88,3 +88,16 @@ Každá součást řešení musí striktně dodržovat povinné minimum předmě
 - Klient (i vyučující na cvičení) může kdykoliv změnit názor nebo specifikaci.
 - Návrh musí být modulární a připravený na změny požadavků.
 - Všechna rozhodnutí k otevřeným bodům musí být jasně formulována a zdůvodněna v `README.md` v oddílu **Rozhodnutí**.
+
+---
+
+### 💬 ZÁSADA 7: ČISTÝ A DŮSLEDNĚ KOMENTOVANÝ KÓD (Well-commented Code)
+- Veškerý nově psaný kód (třídy, rozhraní, servisní metody, validace, DTO, entity, SQL migrace) **musí být řádně a srozumitelně okomentován** (Javadoc + vysvětlující inline komentáře).
+- Komentáře mají vysvětlovat nejen *co* daná metoda dělá, ale zejména *proč* (jaké obchodní pravidlo či invariant zadání B tím plníme), aby byl kód maximálně čitelný a připravený k hladké obhajobě před vyučujícím.
+
+---
+
+### ✅ ZÁSADA 8: IMPLEMENTAČNÍ PLÁN V PROJEKTU A ODŠKRTÁVÁNÍ ÚKOLŮ (Task Checklist)
+- Implementační plán je trvalou součástí projektu v kořenu repozitáře jako `IMPLEMENTATION_PLAN.md`.
+- Všechny fáze a dílčí kroky implementace jsou vedeny formou přehledného odškrtávacího seznamu (`- [ ]` / `- [x]`).
+- Asistent po dokončení každého funkčního celku aktualizuje stav a příslušný bod odškrtne.
