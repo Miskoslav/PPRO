@@ -1,0 +1,30 @@
+#!/bin/sh
+# Git pre-commit hook pro projekt PPRO (Zadání B - Sklad)
+# Účel: Zajišťuje, že před každým commitem je zkontrolována a případně aktualizována
+# technická dokumentace a absolutní zdroj pravdy (README.md).
+
+# Pokud je nastavena proměnná prostředí SKIP_DOCS=1, kontrolu přeskočíme
+if [ "$SKIP_DOCS" = "1" ]; then
+    exit 0
+fi
+
+# Zjistíme, zda commit obsahuje změny v README.md
+README_STAGED=$(git diff --cached --name-only | grep -E '^README\.md$')
+
+if [ -z "$README_STAGED" ]; then
+    echo "================================================================================"
+    echo "[UPOZORNENI PRE-COMMIT HOOKU] README.md neni soucasti tohoto commitu!"
+    echo "Dle pravidel projektu je README.md absolutnim zdrojem pravdy a technickou"
+    echo "dokumentaci (vcetne zaznamu rozhodnuti a zmen postupu)."
+    echo ""
+    echo "Prosim ujistete se, ze jsou v README.md zaznamenany veskere aktualni zmeny."
+    echo "Pokud chcete commitnout BEZ zmeny README.md, pouzijte bud:"
+    echo "  git commit --no-verify -m \"Vase zprava\""
+    echo "nebo:"
+    echo "  SKIP_DOCS=1 git commit -m \"Vase zprava\""
+    echo "================================================================================"
+    exit 1
+fi
+
+echo "[PRE-COMMIT HOOK] README.md je soucasti commitu. Kontrola probehla v poradku."
+exit 0
