@@ -1,0 +1,119 @@
+# ==============================================================================
+# Hlavní konfigurace Spring Boot aplikace Sklad (Dřevěnka s.r.o.)
+# Projekt PPRO - ZS 2026/2027
+# ==============================================================================
+
+spring:
+  application:
+    name: drevenka-warehouse-backend
+
+  profiles:
+    # VÝVOJOVÝ PROFIL: 'h2' = in-memory DB, spuštění bez Dockeru/PostgreSQL.
+    # Pro plné prostředí: přepni na 'local' (vyžaduje běžící PostgreSQL)
+    # nebo 'docker' (pro docker compose up).
+    active: h2
+
+  # Konfigurace JPA / Hibernate
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Striktní pravidlo PPRO: DDL generování je vypnuto, schéma spravuje výhradně Flyway
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  # Konfigurace verzovaných databázových migrací Flyway
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+# Nastavení HTTP serveru
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Konfigurace interaktivní OpenAPI 3 (Swagger UI) dokumentace
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+
+---
+# ==============================================================================
+# Profil LOCAL - Vývoj na lokálním počítači (připojení k lokální PostgreSQL)
+# ==============================================================================
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/drevenka_warehouse
+    username: warehouse_user
+    password: warehouse_secret_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+
+---
+# ==============================================================================
+# Profil DOCKER - Běh v kontejneru v rámci docker-compose sítě
+# ==============================================================================
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: jdbc:postgresql://db:5432/drevenka_warehouse
+    username: warehouse_user
+    password: warehouse_secret_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: false
+
+---
+# ==============================================================================
+# Profil H2 - Rychlý in-memory běh bez nutnosti spuštěné databáze (pro dev/test)
+# ==============================================================================
+spring:
+  config:
+    activate:
+      on-profile: h2
+
+  datasource:
+    url: jdbc:h2:mem:drevenka_warehouse;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    # Pozn.: database-platform (dialect) pro H2 se záměrně neuvádí –
+    # Hibernate jej detekuje automaticky (ruční uvedení by generovalo deprecation warning HHH90000025).
+    hibernate:
+      # 'create-drop': Hibernate vytvoří schéma při startu a smaže při vypnutí.
+      # Bezpečné pro vývojový H2 profil – slouží pouze pro ověření startu aplikace.
+      # Flyway migrace jsou vypnuty, proto schéma spravuje Hibernate.
+      ddl-auto: create-drop
+    show-sql: true
+
+  flyway:
+    # H2 in-memory profil: Flyway je záměrně vypnut.
+    # Migrace jsou určeny výhradně pro PostgreSQL (profily local a docker).
+    enabled: false

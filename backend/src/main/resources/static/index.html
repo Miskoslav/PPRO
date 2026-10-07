@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Informační systém skladu pro e-shop Dřevěnka s.r.o. Správa zásob, přehled skladů a sledování stavu produktů." />
+  <title>Dřevěnka s.r.o. – Skladový systém</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =====================================================================
+       DESIGN SYSTÉM – Dřevěnka s.r.o.
+       Čistý, profesionální vzhled podnikového informačního systému
+       ===================================================================== */
+    :root {
+      --bg-base:        #0b0f17;
+      --bg-surface:     #111722;
+      --bg-card:        #161f30;
+      --bg-card-hover:  #1c283d;
+      --bg-input:       #0d1420;
+
+      --border:         #233044;
+      --border-light:   #2c3d56;
+
+      --text-primary:   #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted:     #64748b;
+
+      --accent:         #2563eb;
+      --accent-hover:   #1d4ed8;
+
+      --stock-ok:       #22c55e;
+      --stock-low:      #f59e0b;
+      --stock-critical: #ef4444;
+      --stock-ok-bg:    rgba(34, 197, 94, 0.1);
+      --stock-low-bg:   rgba(245, 158, 11, 0.1);
+      --stock-crit-bg:  rgba(239, 68, 68, 0.1);
+
+      --sidebar-w:  250px;
+      --radius-sm:  4px;
+      --radius-md:  8px;
+      --radius-lg:  12px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* Boční panel (Sidebar) */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: transform 0.2s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: #1e293b;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #60a5fa;
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Stavový indikátor v systémových informacích */
+    .status-indicator {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--stock-ok);
+      flex-shrink: 0;
+      display: inline-block;
+    }
+
+    .status-indicator.offline {
+      background: var(--stock-critical);
+    }
+
+    /* Navigace */
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 0.75rem 0.6rem 0.35rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: #1e293b;
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      color: currentColor;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--stock-critical);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      padding: 0.85rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Hlavní obsah */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 54px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: #273549;
+      border-color: var(--border-light);
+    }
+
+    /* Stránky (SPA) */
+    .page {
+      display: none;
+      padding: 1.5rem;
+      flex: 1;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .page-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .page-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* Mřížka statistik */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem;
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .stat-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .stat-card.alert-critical .stat-value {
+      color: var(--stock-critical);
+    }
+    .stat-card.alert-warning .stat-value {
+      color: var(--stock-low);
+    }
+    .stat-card.alert-ok .stat-value {
+      color: var(--stock-ok);
+    }
+
+    /* Sklady přehled */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.85rem;
+    }
+
+    .warehouse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .warehouse-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+    }
+
+    .wh-box-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .wh-box-code {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .wh-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .metric-item p {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.15rem;
+    }
+    .metric-item strong {
+      font-size: 1.1rem;
+      color: var(--text-primary);
+    }
+
+    /* Tabulky */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .table-toolbar {
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .table-toolbar-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-input {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 0.75rem 0.4rem 2rem;
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      outline: none;
+      width: 220px;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-icon-svg {
+      position: absolute;
+      left: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      color: var(--text-muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.83rem;
+    }
+
+    th {
+      background: #111a29;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    /* Stavové štítky */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge-ok {
+      background: var(--stock-ok-bg);
+      color: var(--stock-ok);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .badge-low {
+      background: var(--stock-low-bg);
+      color: var(--stock-low);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .badge-critical {
+      background: var(--stock-crit-bg);
+      color: var(--stock-critical);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* Prázdný stav a informační panely */
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .empty-state p {
+      margin-top: 0.35rem;
+      color: var(--text-secondary);
+    }
+
+    .info-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .info-panel strong {
+      color: var(--text-primary);
+    }
+
+    /* Systémové informace */
+    .system-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .system-info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem;
+    }
+
+    .system-info-card h4 {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .system-info-card p {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Responzivita */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main {
+        margin-left: 0;
+      }
+      .menu-toggle {
+        display: block;
+      }
+      .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 90;
+      }
+      .overlay.active {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <!-- ================================================================
+       BOČNÍ NAVIGACE (SIDEBAR)
+       ================================================================ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Dřevěnka s.r.o.</h1>
+          <p>Skladový systém</p>
+        </div>
+      </div>
+    </div>
+
+
+    <nav class="sidebar-nav">
+      <span class="nav-label">Přehled</span>
+
+      <button class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1"/>
+            <rect width="7" height="5" x="14" y="3" rx="1"/>
+            <rect width="7" height="9" x="14" y="12" rx="1"/>
+            <rect width="7" height="5" x="3" y="16" rx="1"/>
+          </svg>
+        </span>
+        Dashboard
+      </button>
+
+      <span class="nav-label">Katalog a zásoby</span>
+
+      <button class="nav-item" id="nav-products" onclick="navigate('products')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m7.5 4.27 9 5.15"/>
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+            <path d="m3.3 7 8.7 5 8.7-5"/>
+            <path d="M12 22V12"/>
+          </svg>
+        </span>
+        Produkty
+      </button>
+
+      <button class="nav-item" id="nav-alerts" onclick="navigate('alerts')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </span>
+        Upozornění zásob
+        <span class="nav-badge" id="alerts-badge" style="display:none">0</span>
+      </button>
+
+      <span class="nav-label">Provoz skladu</span>
+
+      <button class="nav-item" id="nav-warehouses" onclick="navigate('warehouses')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/>
+            <path d="M3 7l9-4 9 4v14H3V7z"/>
+            <path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/>
+          </svg>
+        </span>
+        Sklady
+      </button>
+
+      <button class="nav-item" id="nav-orders" onclick="navigate('orders')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="16" height="20" x="4" y="2" rx="2"/>
+            <line x1="8" y1="6" x2="16" y2="6"/>
+            <line x1="8" y1="10" x2="16" y2="10"/>
+            <line x1="8" y1="14" x2="12" y2="14"/>
+          </svg>
+        </span>
+        Objednávky
+      </button>
+
+      <span class="nav-label">Správa</span>
+
+      <button class="nav-item" id="nav-system" onclick="navigate('system')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="8" x="2" y="2" rx="2" ry="2"/>
+            <rect width="20" height="8" x="2" y="14" rx="2" ry="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/>
+            <line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+        </span>
+        Informace o systému
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      Skladový systém Dřevěnka s.r.o.<br/>
+      Verze 0.1.0 (Milestone 1)
+    </div>
+  </aside>
+
+  <!-- ================================================================
+       HLAVNÍ OBSAH
+       ================================================================ -->
+  <main class="main">
+
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Otevřít menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="topbar-title" id="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary" onclick="refreshAll()" id="btn-refresh">
+          Obnovit data
+        </button>
+      </div>
+    </header>
+
+    <!-- STRÁNKA: DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h2 class="page-title">Přehled skladu</h2>
+        <p class="page-desc">Aktuální stav zásob, skladových kapacit a kritických položek</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Položky v katalogu</span>
+          </div>
+          <div class="stat-value" id="dash-val-total">–</div>
+          <div class="stat-sub">Celkem evidovaných produktů</div>
+        </div>
+
+        <div class="stat-card alert-critical">
+          <div class="stat-header">
+            <span class="stat-label">Pod minimální zásobou</span>
+          </div>
+          <div class="stat-value" id="dash-val-critical">–</div>
+          <div class="stat-sub">Položky vyžadující doobjednání</div>
+        </div>
+
+        <div class="stat-card alert-warning">
+          <div class="stat-header">
+            <span class="stat-label">Blíží se k minimu</span>
+          </div>
+          <div class="stat-value" id="dash-val-low">–</div>
+          <div class="stat-sub">Doporučeno sledovat stav</div>
+        </div>
+
+        <div class="stat-card alert-ok">
+          <div class="stat-header">
+            <span class="stat-label">Dostatečná zásoba</span>
+          </div>
+          <div class="stat-value" id="dash-val-ok">–</div>
+          <div class="stat-sub">V souladu se skladovým plánem</div>
+        </div>
+      </div>
+
+      <h3 class="section-title">Pobočky a sklady</h3>
+      <div class="warehouse-grid">
+        <div class="warehouse-box">
+          <div class="wh-box-title">Hlavní sklad</div>
+          <div class="wh-box-code">Hradec Králové (HRADEC) · Běžný provoz a expedice</div>
+          <div class="wh-metrics">
+            <div class="metric-item">
+              <p>Fyzická zásoba</p>
+              <strong id="wh-hradec-qty">–</strong>
+            </div>
+            <div class="metric-item">
+              <p>Rezervováno</p>
+              <strong id="wh-hradec-res">–</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="warehouse-box">
+          <div class="wh-box-title">Sezónní sklad (garáž)</div>
+          <div class="wh-box-code">Třebechovice pod Orebem (TREBECHOVICE) · Přebytečné zásoby</div>
+          <div class="wh-metrics">
+            <div class="metric-item">
+              <p>Fyzická zásoba</p>
+              <strong id="wh-treb-qty">–</strong>
+            </div>
+            <div class="metric-item">
+              <p>Rezervováno</p>
+              <strong id="wh-treb-res">–</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-title">Kritické zásoby k doobjednání</h3>
+      <div class="table-container">
+        <div id="dash-alerts-table">
+          <div class="empty-state">
+            <p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRÁNKA: PRODUKTY -->
+    <section class="page" id="page-products">
+      <div class="page-header">
+        <h2 class="page-title">Katalog produktů</h2>
+        <p class="page-desc">Přehled dřevěných hraček, nákupních cen, prodejních cen a minimálních limitů</p>
+      </div>
+
+      <div class="table-container">
+        <div class="table-toolbar">
+          <div>
+            <span class="table-toolbar-title">Seznam produktů</span>
+            <span style="font-size:0.8rem;color:var(--text-muted);" id="products-count"></span>
+          </div>
+          <div class="search-box">
+            <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="search-input" id="product-search" placeholder="Hledat podle SKU nebo názvu…" oninput="filterProducts()" />
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU kód</th>
+                <th>Název produktu</th>
+                <th>Nákupní cena</th>
+                <th>Prodejní cena</th>
+                <th>Marže</th>
+                <th>Minimální zásoba</th>
+                <th>Stav zásoby</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody">
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <strong>Katalog je připraven k napojení na databázi.</strong>
+                    <p>Po spuštění migrací a vložení produktů se zde zobrazí kompletní přehled sortimentu.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRÁNKA: UPOZORNĚNÍ ZÁSOB -->
+    <section class="page" id="page-alerts">
+      <div class="page-header">
+        <h2 class="page-title">Upozornění na nízké zásoby</h2>
+        <p class="page-desc">Prioritní seznam položek, které klesly pod bezpečnou minimální úroveň</p>
+      </div>
+
+      <div class="table-container">
+        <div class="table-toolbar">
+          <span class="table-toolbar-title">Položky vyžadující objednávku u dodavatele</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Produkt</th>
+                <th>Aktuální sklad</th>
+                <th>Minimální limit</th>
+                <th>Chybějící množství</th>
+                <th>Stav</th>
+              </tr>
+            </thead>
+            <tbody id="alerts-tbody">
+              <tr>
+                <td colspan="6">
+                  <div class="empty-state">
+                    <p>Nebyly nalezeny žádné produkty pod minimální bezpečnou zásobou.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRÁNKA: SKLADY -->
+    <section class="page" id="page-warehouses">
+      <div class="page-header">
+        <h2 class="page-title">Správa skladů</h2>
+        <p class="page-desc">Přehled evidenčních míst a přesunů zboží mezi sklady</p>
+      </div>
+
+      <div class="warehouse-grid">
+        <div class="warehouse-box">
+          <div class="wh-box-title">Hlavní sklad – Hradec Králové</div>
+          <div class="wh-box-code">Kód: HRADEC · Provozní sklad</div>
+          <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.5;">
+            Centrální sklad s přímou návazností na expedici zákaznických objednávek e-shopu.
+          </p>
+        </div>
+
+        <div class="warehouse-box">
+          <div class="wh-box-title">Sezónní sklad – Třebechovice pod Orebem</div>
+          <div class="wh-box-code">Kód: TREBECHOVICE · Zásobní sklad</div>
+          <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.5;">
+            Prostor pro sezónní a větší zásoby dřevěných hraček. Převozy do Hradce Králové jsou evidovány v knize skladových pohybů.
+          </p>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <strong>Plánované rozšíření:</strong> Detailní přehled skladových regálů, převodky mezi sklady a inventurní protokoly budou aktivní po dokončení Fáze 2 a Milestone 2.
+      </div>
+    </section>
+
+    <!-- STRÁNKA: OBJEDNÁVKY -->
+    <section class="page" id="page-orders">
+      <div class="page-header">
+        <h2 class="page-title">Zákaznické objednávky</h2>
+        <p class="page-desc">Evidence objednávek z e-shopu, rezervace a expedice zboží</p>
+      </div>
+
+      <div class="info-panel">
+        <strong>Dvoufázový rezervační systém:</strong> Objednávky při vytvoření rezervují disponibilní zásobu, aby nedošlo k prodeji neexistujícího zboží. Fyzický odpis ze skladu probíhá až při expedici.
+      </div>
+
+      <div class="table-container">
+        <div class="table-toolbar">
+          <span class="table-toolbar-title">Přehled objednávek</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Číslo objednávky</th>
+              <th>Zákazník</th>
+              <th>Datum</th>
+              <th>Položky</th>
+              <th>Celkem</th>
+              <th>Stav zpracování</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <p>Žádné rozpracované objednávky. Modul objednávek bude implementován v návaznosti na skladové entity v Milestone 3.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STRÁNKA: SYSTÉM -->
+    <section class="page" id="page-system">
+      <div class="page-header">
+        <h2 class="page-title">Informace o systému</h2>
+        <p class="page-desc">Provozní parametry aplikace a diagnostika spojení</p>
+      </div>
+
+      <div class="system-info-grid">
+        <div class="system-info-card">
+          <h4>Stav serveru</h4>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem;">
+            <span class="status-indicator" id="status-indicator"></span>
+            <p id="sys-status" style="margin:0;">Načítání…</p>
+          </div>
+        </div>
+        <div class="system-info-card">
+          <h4>Aplikace</h4>
+          <p id="sys-app">–</p>
+        </div>
+        <div class="system-info-card">
+          <h4>Verze</h4>
+          <p id="sys-ver">–</p>
+        </div>
+        <div class="system-info-card">
+          <h4>Čas serveru</h4>
+          <p id="sys-time">–</p>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <strong>Diagnostika:</strong> Tento přehled ověřuje stav backendového serveru. Diagnostický endpoint běží na interní adrese <code>/api/v1/health</code>.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/**
+ * Informační systém Dřevěnka s.r.o.
+ * Správa klientského rozhraní a komunikace s backendovým REST API
+ */
+
+const PAGE_TITLES = {
+  dashboard:  'Dashboard',
+  products:   'Katalog produktů',
+  alerts:     'Upozornění zásob',
+  warehouses: 'Správa skladů',
+  orders:     'Objednávky',
+  system:     'Informace o systému'
+};
+
+let productsCache = [];
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+  const pageEl = document.getElementById('page-' + page);
+  const navEl  = document.getElementById('nav-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  if (navEl)  navEl.classList.add('active');
+
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[page] || page;
+
+  if (page === 'system') loadSystemInfo();
+  closeSidebar();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('active');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('active');
+}
+
+async function apiFetch(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch (err) {
+    return null;
+  }
+}
+
+async function loadSystemInfo() {
+  const data = await apiFetch('/api/v1/health');
+  const indicator = document.getElementById('status-indicator');
+
+  if (data && data.status === 'UP') {
+    if (indicator) indicator.classList.remove('offline');
+    document.getElementById('sys-status').textContent = 'V provozu';
+    document.getElementById('sys-app').textContent = data.aplikace || 'Skladový systém';
+    document.getElementById('sys-ver').textContent = data.verze || '0.1.0-SNAPSHOT';
+    document.getElementById('sys-time').textContent = data.serverTime ? new Date(data.serverTime).toLocaleTimeString('cs-CZ') : '–';
+  } else {
+    if (indicator) indicator.classList.add('offline');
+    document.getElementById('sys-status').textContent = 'Nedostupný';
+    document.getElementById('sys-app').textContent = '–';
+    document.getElementById('sys-ver').textContent = '–';
+    document.getElementById('sys-time').textContent = '–';
+  }
+}
+
+async function loadProducts() {
+  const data = await apiFetch('/api/v1/products');
+  const tbody = document.getElementById('products-tbody');
+  const countEl = document.getElementById('products-count');
+
+  if (!data || !Array.isArray(data)) {
+    productsCache = [];
+    countEl.textContent = '';
+    tbody.innerHTML = `<tr><td colspan="7">
+      <div class="empty-state">
+        <strong>Katalog je připraven k napojení na databázi.</strong>
+        <p>Po spuštění migrací a vložení produktů se zde zobrazí kompletní přehled sortimentu.</p>
+      </div></td></tr>`;
+
+    document.getElementById('dash-val-total').textContent = '0';
+    document.getElementById('dash-val-critical').textContent = '0';
+    document.getElementById('dash-val-low').textContent = '0';
+    document.getElementById('dash-val-ok').textContent = '0';
+    return;
+  }
+
+  productsCache = data;
+  countEl.textContent = `(${data.length} položek)`;
+
+  let cntOk = 0, cntLow = 0, cntCrit = 0;
+  data.forEach(p => {
+    const level = getStockLevel(p);
+    if (level === 'ok') cntOk++;
+    else if (level === 'low') cntLow++;
+    else cntCrit++;
+  });
+
+  document.getElementById('dash-val-total').textContent = data.length;
+  document.getElementById('dash-val-critical').textContent = cntCrit;
+  document.getElementById('dash-val-low').textContent = cntLow;
+  document.getElementById('dash-val-ok').textContent = cntOk;
+
+  const badge = document.getElementById('alerts-badge');
+  if (cntCrit > 0) {
+    badge.textContent = cntCrit;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  renderProductsTable(data);
+}
+
+function getStockLevel(product) {
+  const qty = product.totalQuantity ?? 0;
+  const min = product.minStockLevel ?? 0;
+  if (qty <= 0 || qty < min) return 'critical';
+  if (qty < min * 1.5) return 'low';
+  return 'ok';
+}
+
+function renderProductsTable(products) {
+  const tbody = document.getElementById('products-tbody');
+  if (products.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Hledání neodpovídá žádný produkt.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = products.map(p => {
+    const level = getStockLevel(p);
+    let badgeHtml = '<span class="badge badge-ok">V pořádku</span>';
+    if (level === 'low') badgeHtml = '<span class="badge badge-low">Nízký stav</span>';
+    else if (level === 'critical') badgeHtml = '<span class="badge badge-critical">Kritický stav</span>';
+
+    const margin = p.sellingPrice && p.purchasePrice
+      ? (((p.sellingPrice - p.purchasePrice) / p.sellingPrice) * 100).toFixed(1) + ' %'
+      : '–';
+
+    return `<tr>
+      <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+      <td style="font-weight:600;">${esc(p.name || '–')}</td>
+      <td>${p.purchasePrice != null ? p.purchasePrice.toFixed(2) + ' Kč' : '–'}</td>
+      <td>${p.sellingPrice != null ? p.sellingPrice.toFixed(2) + ' Kč' : '–'}</td>
+      <td>${margin}</td>
+      <td>${p.minStockLevel ?? '–'} ks</td>
+      <td>${badgeHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterProducts() {
+  const query = document.getElementById('product-search').value.toLowerCase().trim();
+  const filtered = productsCache.filter(p =>
+    (p.skuCode || p.sku || '').toLowerCase().includes(query) ||
+    (p.name || '').toLowerCase().includes(query)
+  );
+  renderProductsTable(filtered);
+}
+
+async function loadAlerts() {
+  const data = await apiFetch('/api/v1/products/alerts/low-stock');
+  const tbody = document.getElementById('alerts-tbody');
+  const dashTable = document.getElementById('dash-alerts-table');
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p></div></td></tr>`;
+    dashTable.innerHTML = `<div class="empty-state"><p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p></div>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(p => {
+    const qty = p.totalQuantity ?? 0;
+    const min = p.minStockLevel ?? 0;
+    const diff = min - qty;
+    return `<tr>
+      <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+      <td style="font-weight:600;">${esc(p.name || '–')}</td>
+      <td>${qty} ks</td>
+      <td>${min} ks</td>
+      <td style="color:var(--stock-critical);font-weight:600;">-${diff} ks</td>
+      <td><span class="badge badge-critical">Kritický stav</span></td>
+    </tr>`;
+  }).join('');
+
+  dashTable.innerHTML = `<div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr><th>SKU</th><th>Produkt</th><th>Zásoba</th><th>Minimum</th><th>Stav</th></tr>
+      </thead>
+      <tbody>
+        ${data.slice(0, 5).map(p => `<tr>
+          <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+          <td style="font-weight:600;">${esc(p.name || '–')}</td>
+          <td>${p.totalQuantity ?? 0} ks</td>
+          <td>${p.minStockLevel ?? 0} ks</td>
+          <td><span class="badge badge-critical">Kritický stav</span></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function refreshAll() {
+  const btn = document.getElementById('btn-refresh');
+  btn.textContent = 'Načítání…';
+  btn.disabled = true;
+  Promise.all([loadSystemInfo(), loadProducts(), loadAlerts()])
+    .finally(() => {
+      btn.textContent = 'Obnovit data';
+      btn.disabled = false;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSystemInfo();
+  loadProducts();
+  loadAlerts();
+  setInterval(refreshAll, 60000);
+});
+</script>
+
+</body>
+</html>

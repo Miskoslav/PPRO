@@ -167,7 +167,8 @@ Systém je postaven na moderním, robustním a typovém stacku splňujícím ve�
 - **Databáze:** PostgreSQL 16 (běžící v Dockeru).
 - **Databázové migrace:** Flyway (verzované SQL skripty `V1__...`, `V2__...`).
 - **Dokumentace API:** SpringDoc OpenAPI 3 / Swagger UI (`/swagger-ui.html`).
-- **Frontend / Demo rozhraní:** Webové responzivní rozhraní pro skladníka i klienta (`src/main/resources/static`).
+- **Frontend / Webové rozhraní:** Vanilla HTML5 + CSS3 + JavaScript (ES2022+) servírovaný ze `src/main/resources/static/`.
+  - *Odůvodnění:* Není potřeba separátní buildovací nástroj (Webpack, Vite apod.) ani Node.js runtime. Statické soubory jsou přímo součástí Spring Boot JARu. Rozhraní volá REST API asynchronně přes `fetch()`. Google Fonts (Inter) pro moderní typografii. CSS Custom Properties pro design systém (dark mode, barvy stavu zásoby). Přístup je vhodný pro akademický projekt s důrazem na jednoduché spuštění (`docker compose up`).
 - **Kontejnerizace:** Docker & Docker Compose (`docker compose up --build`).
 - **Implementační plán:** Kompletní plán s odškrtávacím seznamem je v souboru [IMPLEMENTATION_PLAN.md](file:///u:/PPRO/PPRO/IMPLEMENTATION_PLAN.md).
 
@@ -201,3 +202,15 @@ Aplikace a databáze automaticky naběhnou, proběhnou migrace a databáze se na
   - Zvolen technologický stack: **Java (Spring Boot 3) + PostgreSQL + Flyway + Docker Compose**.
   - Doplnění Zásad 7 a 8 do [AGENTS.md](file:///u:/PPRO/PPRO/AGENTS.md) (důsledné komentování kódu a správa úkolů přes odškrtávací seznam).
   - Vytvořen kompletní [IMPLEMENTATION_PLAN.md](file:///u:/PPRO/PPRO/IMPLEMENTATION_PLAN.md) přímo v projektu pro Milestone 1 (demo entity `Product`).
+
+- **2026-10-07:**
+  - První úspěšné spuštění aplikace (Spring Boot + H2 in-memory DB, profil `h2`).
+  - Přidán `HealthController` s endpointem `GET /api/v1/health` – smoke-test REST API.
+  - Vytvořen kompletní webový frontend (Vanilla HTML/CSS/JS, dark mode, responzivní SPA layout) v `src/main/resources/static/index.html`.
+  - Doplněn Javadoc do `WarehouseApplication.java` a `HealthController.java`.
+  - Přidán `@ActiveProfiles("h2")` do integračního testu – `contextLoads()` prochází bez PostgreSQL.
+  - Zaznamenáno rozhodnutí o frontendové technologii (Vanilla JS bez buildovacího nástroje) do sekce Technologický stack.
+  - Kodifikována **Zásada 9** v `AGENTS.md`: Uživatelské rozhraní bez AI klišé (odstraněny emotikony, blikající tečky, technický žargon Swagger z klientského UI; přechod na čistý, profesionální firemní design).
+  - Přesunut online indikátor ze sidebaru / Dashboardu do sekce Informace o systému.
+  - Odškrtnuta Fáze 1 (Inicializace projektu a Maven konfigurace) v `IMPLEMENTATION_PLAN.md`.
+

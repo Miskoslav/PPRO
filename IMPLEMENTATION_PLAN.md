@@ -12,15 +12,15 @@
 V této fázi budujeme plně funkční vertikálu (od databáze až po webové UI a Swagger) pro správu dřevěných hraček e-shopu Dřevěnka s.r.o.
 
 ### Fáze 1: Inicializace Spring Boot projektu a Maven konfigurace
-- [ ] **1.1** Vytvoření adresářové struktury projektu (`backend/` se standardní Maven layout strukturou).
-- [ ] **1.2** Konfigurace `pom.xml` se všemi potřebnými závislostmi:
+- [x] **1.1** Vytvoření adresářové struktury projektu (`backend/` se standardní Maven layout strukturou).
+- [x] **1.2** Konfigurace `pom.xml` se všemi potřebnými závislostmi:
   - Spring Boot 3.x, Java 21+
   - Spring Data JPA + PostgreSQL driver + Flyway (migrace)
   - Spring Boot Validation (Jakarta)
   - SpringDoc OpenAPI (Swagger UI)
   - Spring Boot Test + H2 (pro testovací účely)
-- [ ] **1.3** Zajištění Maven wrapperu (`mvnw`, `mvnw.cmd`, `.mvn/wrapper/maven-wrapper.properties`).
-- [ ] **1.4** Konfigurace aplikačních profilů v `application.yml` (profily `local` a `docker`, datasource, JPA nastavení, Flyway).
+- [x] **1.3** Zajištění Maven wrapperu (`mvnw`, `mvnw.cmd`, `.mvn/wrapper/maven-wrapper.properties`).
+- [x] **1.4** Konfigurace aplikačních profilů v `application.yml` (profily `local` a `docker`, datasource, JPA nastavení, Flyway).
 
 ### Fáze 2: Databázová vrstva a verzované Flyway migrace
 - [ ] **2.1** Vytvoření migračního skriptu `V1__create_products_table.sql`:

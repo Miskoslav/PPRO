@@ -101,3 +101,15 @@ Každá součást řešení musí striktně dodržovat povinné minimum předmě
 - Implementační plán je trvalou součástí projektu v kořenu repozitáře jako `IMPLEMENTATION_PLAN.md`.
 - Všechny fáze a dílčí kroky implementace jsou vedeny formou přehledného odškrtávacího seznamu (`- [ ]` / `- [x]`).
 - Asistent po dokončení každého funkčního celku aktualizuje stav a příslušný bod odškrtne.
+
+---
+
+### 🎨 ZÁSADA 9: PŘIROZENÝ VZHLED APLIKACE BEZ AI PRVKŮ (Clean & Realistic Business UI)
+- Uživatelské rozhraní (UI) musí působit seriózně, lidsky navrženým dojmem a realisticky pro reálnou českou firmu (Dřevěnka s.r.o.).
+- **Zákaz typických AI prvků a generických klišé:**
+  - **Žádné emotikony / emoji** v navigaci, tlačítkách, tabulkách ani textech (např. 🪵, 🪆, 🔔, 🏭, 📦, 📊, ⚙️, ❌, ✅). Místo emotikonů používat buď čisté minimalistické SVG ikony, nebo pouze srozumitelné textové popisky.
+  - **Žádné blikající pulzující tečky** (pulzující online/offline indikátory) ani zbytečné ozdobné tečky a oddělovače (např. `· PPRO FIM`).
+  - **Žádné nadbytečné speciální znaky.**
+- **Žádný vývojářský žargon v uživatelském rozhraní:**
+  - V klientském UI nesmí figurovat odkazy ani zmínky jako „Swagger API“, raw JSON výpisy apod. Rozhraní slouží skladníkovi a vedoucímu e-shopu, nikoliv programátorovi (Swagger zůstává k dispozici pouze pro vývojáře na standardní URL `/swagger-ui.html`, ale není vystaven v běžném menu aplikace).
+
