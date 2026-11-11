@@ -87,6 +87,10 @@ Dle pokynů k semestrálnímu projektu obsahuje tato sekce konkrétní rozhodnut
 - **Rozhodnutí:** Objednávku je povoleno upravit (změnit položky nebo množství) pouze ve stavu `Zaplaceno / Čeká na zpracování`. Při úpravě systém uvolní původní rezervace, ověří dostupnost nových položek, vytvoří nové rezervace a vyčíslí přeplatek/nedoplatek. Jakmile je objednávka přepnuta do stavu `Ve vychystávání` nebo `Expedováno`, je pro přímé změny uzamčena a další požadavky se řeší standardní novou objednávkou nebo vratkou.
 - **Odůvodnění:** Zabraňuje se chaosu ve skladu, aby skladník nebyl zmaten změnou objednávky v momentě, kdy ji již drží v ruce a balí, a současně umožňuje klientovi vyjít vstříc zákazníkovi, který zavolá bezprostředně po nákupu.
 
+### 6. Evidence doobjednání u dodavatele (Zboží na cestě)
+- **Rozhodnutí:** Systém zavádí sledování objednaného zboží u truhláře/výrobce (`incomingQuantity` – zboží na cestě). Pokud disponibilní zásoba poklesne pod minimální bezpečnou mez, ale skladník již zboží prokazatelně doobjednal (`incomingQuantity > 0`), systém nehlásí kritický poplach červenou barvou, nýbrž klidový modrý informativní stav *„Objednáno u dodavatele (na cestě X ks)“*. Skladník může zboží doobjednat přímo z rozhraní a po doručení balíku provést naskladnění do konkrétního skladu (Hradec Králové / Třebechovice), čímž se kusy převedou do fyzické zásoby.
+- **Odůvodnění:** Odstraňuje zbytečný stres na skladě, zamezuje duplicitním objednávkám u truhláře od různých zaměstnanců a poskytuje okamžitou jistotu, že vyřešení nízké zásoby je již na cestě.
+
 ---
 
 ## 🏗️ 3. Architektura a technický návrh
@@ -147,15 +151,15 @@ erDiagram
 
 | Požadavek | Stav | Poznámka k realizaci |
 | :--- | :---: | :--- |
-| **Tři vrstvy se závislostmi jedním směrem** | ⏳ Návrh | Controllers $\rightarrow$ Services $\rightarrow$ Repositories |
-| **Relační databáze v Dockeru** | ⏳ Návrh | PostgreSQL kontejner |
-| **Databázové migrace** | ⏳ Návrh | Verzované DDL migrace (žádné ruční vytváření tabulek) |
-| **Nejméně 5 entit** | ✅ Návrh | Navrženo 8 entit (Product, Category, Warehouse, StockItem, StockMovement, Customer, Order, OrderItem) |
-| **Alespoň jedna vazba M:N** | ✅ Návrh | Vazba mezi `Product` a `Category` (`ProductCategory`) |
-| **Automatizované testy** | ⏳ V přípravě | Unit testy disponibilní zásoby, zamezení záporu, fixace cen; integrační testy transakcí |
-| **Spuštění příkazem `docker compose up`** | ⏳ V přípravě | Kompletní konfigurace v `docker-compose.yml` |
-| **Technická dokumentace v README.md** | ✅ Hotovo | Detailní zadání, pravidla, rozhodnutí k otevřeným bodům |
-| **Syntetická data (žádné osobní/citlivé údaje)** | ✅ Zajištěno | Výhradně fiktivní testovací data a hračky Dřevěnky |
+| **Tři vrstvy se závislostmi jedním směrem** | ✅ Hotovo | `ProductController` $\rightarrow$ `ProductService` $\rightarrow$ `ProductRepository` |
+| **Relační databáze v Dockeru** | ✅ Připraveno | PostgreSQL 16 kontejner v `docker-compose.yml` s perzistentním volume |
+| **Databázové migrace** | ✅ Hotovo | Verzované Flyway migrace (`V1__create_products_table.sql`, `V2__seed_demo_products.sql`) |
+| **Nejméně 5 entit** | ⏳ Rozpracováno | 4 entity hotovy (`Product`, `Warehouse`, `Category`, `StockItem`); zbývající doménové entity (`Customer`, `Order`, `OrderItem`, `StockMovement`) v přípravě pro M3 |
+| **Alespoň jedna vazba M:N** | ✅ Hotovo | Plně funkční vazba M:N mezi `Product` a `Category` (`product_categories`) v DB i v JPA modelu |
+| **Automatizované testy** | ✅ Hotovo | 22 automatizovaných testů (unit testy byznys pravidel, doobjednávek a marží, integrační testy REST API a kontextu) |
+| **Spuštění příkazem `docker compose up`** | ✅ Hotovo | Multi-stage `Dockerfile` a `docker-compose.yml` s healthcheckem databáze |
+| **Technická dokumentace v README.md** | ✅ Hotovo | Detailní zadání, pravidla, rozhodnutí k otevřeným bodům, technický deník (SSOT) |
+| **Syntetická data (žádné osobní/citlivé údaje)** | ✅ Zajištěno | Výhradně fiktivní sortiment dřevěných hraček Dřevěnky (káča, vláček, kostky, domeček, pejsek) |
 
 ---
 
@@ -170,22 +174,44 @@ Systém je postaven na moderním, robustním a typovém stacku splňujícím ve�
 - **Frontend / Webové rozhraní:** Vanilla HTML5 + CSS3 + JavaScript (ES2022+) servírovaný ze `src/main/resources/static/`.
   - *Odůvodnění:* Není potřeba separátní buildovací nástroj (Webpack, Vite apod.) ani Node.js runtime. Statické soubory jsou přímo součástí Spring Boot JARu. Rozhraní volá REST API asynchronně přes `fetch()`. Google Fonts (Inter) pro moderní typografii. CSS Custom Properties pro design systém (dark mode, barvy stavu zásoby). Přístup je vhodný pro akademický projekt s důrazem na jednoduché spuštění (`docker compose up`).
 - **Kontejnerizace:** Docker & Docker Compose (`docker compose up --build`).
-- **Implementační plán:** Kompletní plán s odškrtávacím seznamem je v souboru [IMPLEMENTATION_PLAN.md](file:///u:/PPRO/PPRO/IMPLEMENTATION_PLAN.md).
+- **Implementační plán:** Kompletní plán s odškrtávacím seznamem je v souboru [IMPLEMENTATION_PLAN.md](file:///c:/Dokumenty/Škola/Vysoká/PPRO/PPRO/IMPLEMENTATION_PLAN.md).
 
 ---
 
-## ⚙️ 6. Návod na zprovoznění a spuštění (Bude aktualizováno)
+## ⚙️ 6. Návod na zprovoznění a spuštění
 
 ### Prerekvizity:
-- Docker Desktop & Docker Compose
-- Java 21+ (na vývojovém stroji)
+- Docker Desktop & Docker Compose (nebo lokální Java 21+ a Maven)
 - Git
 
-### Spuštění celého projektu:
+### Možnost A: Spuštění v kontejneru přes Docker Compose (Doporučeno pro obhajobu)
+Celé prostředí (PostgreSQL databáze + backend + webové UI + inicializační Flyway migrace) naběhne jediným příkazem:
 ```bash
 docker compose up -d
 ```
-Aplikace a databáze automaticky naběhnou, proběhnou migrace a databáze se naplní výchozími syntetickými daty.
+Po naběhnutí je systém dostupný:
+- **Webový informační systém skladu:** [http://localhost:8080](http://localhost:8080)
+- **Interaktivní Swagger UI dokumentace API:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- **OpenAPI specifikace JSON:** [http://localhost:8080/api-docs](http://localhost:8080/api-docs)
+
+Zastavení kontejnerů:
+```bash
+docker compose down
+```
+
+### Možnost B: Lokální vývojové spuštění (Profil `h2`)
+Pro rychlé lokální testování bez nutnosti běžícího Dockeru či PostgreSQL:
+```bash
+cd backend
+mvn spring-boot:run
+```
+Aplikace použije in-memory H2 databázi, Flyway automaticky provede migrace a vloží syntetická data.
+
+### Spuštění automatizovaných testů:
+```bash
+cd backend
+mvn test
+```
 
 ---
 
@@ -194,14 +220,14 @@ Aplikace a databáze automaticky naběhnou, proběhnou migrace a databáze se na
 - **2026-09-30:**
   - Inicializace Git repozitáře a napojení na remote `origin` (`https://github.com/Miskoslav/PPRO.git`).
   - Analýza oficiálního zadání PPRO (ZS 2026/2027) a volba **Zadání B: Sklad pro malý e-shop (Dřevěnka s.r.o.)**.
-  - Vypracování [AGENTS.md](file:///u:/PPRO/PPRO/AGENTS.md) s kodifikací zásad: zákaz samovolných commitů bez výslovného pokynu, README.md jako jediný zdroj pravdy (SSOT), automatické pre-commit hooky.
+  - Vypracování [AGENTS.md](file:///c:/Dokumenty/Škola/Vysoká/PPRO/PPRO/AGENTS.md) s kodifikací zásad: zákaz samovolných commitů bez výslovného pokynu, README.md jako jediný zdroj pravdy (SSOT), automatické pre-commit hooky.
   - Implementace Git `pre-commit` hooku kontrolujícího přítomnost aktualizace `README.md` před každým commitem (`.githooks/pre-commit`).
-  - Vytvoření kompletní technické dokumentace a řešení všech 5 otevřených bodů zadání v [README.md](file:///u:/PPRO/PPRO/README.md).
+  - Vytvoření kompletní technické dokumentace a řešení všech 5 otevřených bodů zadání v [README.md](file:///c:/Dokumenty/Škola/Vysoká/PPRO/PPRO/README.md).
   - Anonymizace a odstranění osobních údajů a e-mailových adres z dokumentace a konfiguračních souborů.
-  - Doplnění Zásady 1b do [AGENTS.md](file:///u:/PPRO/PPRO/AGENTS.md) o povinnosti detailních, strukturovaných a vypovídajících commit zpráv.
+  - Doplnění Zásady 1b do [AGENTS.md](file:///c:/Dokumenty/Škola/Vysoká/PPRO/PPRO/AGENTS.md) o povinnosti detailních, strukturovaných a vypovídajících commit zpráv.
   - Zvolen technologický stack: **Java (Spring Boot 3) + PostgreSQL + Flyway + Docker Compose**.
-  - Doplnění Zásad 7 a 8 do [AGENTS.md](file:///u:/PPRO/PPRO/AGENTS.md) (důsledné komentování kódu a správa úkolů přes odškrtávací seznam).
-  - Vytvořen kompletní [IMPLEMENTATION_PLAN.md](file:///u:/PPRO/PPRO/IMPLEMENTATION_PLAN.md) přímo v projektu pro Milestone 1 (demo entity `Product`).
+  - Doplnění Zásad 7 a 8 do [AGENTS.md](file:///c:/Dokumenty/Škola/Vysoká/PPRO/PPRO/AGENTS.md) (důsledné komentování kódu a správa úkolů přes odškrtávací seznam).
+  - Vytvořen kompletní [IMPLEMENTATION_PLAN.md](file:///c:/Dokumenty/Škola/Vysoká/PPRO/PPRO/IMPLEMENTATION_PLAN.md) přímo v projektu pro Milestone 1 (demo entity `Product`).
 
 - **2026-10-07:**
   - První úspěšné spuštění aplikace (Spring Boot + H2 in-memory DB, profil `h2`).
@@ -213,4 +239,39 @@ Aplikace a databáze automaticky naběhnou, proběhnou migrace a databáze se na
   - Kodifikována **Zásada 9** v `AGENTS.md`: Uživatelské rozhraní bez AI klišé (odstraněny emotikony, blikající tečky, technický žargon Swagger z klientského UI; přechod na čistý, profesionální firemní design).
   - Přesunut online indikátor ze sidebaru / Dashboardu do sekce Informace o systému.
   - Odškrtnuta Fáze 1 (Inicializace projektu a Maven konfigurace) v `IMPLEMENTATION_PLAN.md`.
+
+- **2026-11-11:**
+  - **Dokončen Milestone 1:** Kompletní vertikální realizace klíčové entity `Product` (od DB přes servisní vrstvu až po REST API a frontend).
+  - **Fáze 2 (Databázová vrstva):**
+    - Vytvořena Flyway DDL migrace `V1__create_products_table.sql` pro tabulku `products` s integritními omezeními (unikátní SKU kód, CHECK na nezáporné ceny a minimální skladovou zásobu).
+    - Vytvořena seedovací migrace `V2__seed_demo_products.sql` s 5 autentickými syntetickými položkami sortimentu Dřevěnky (káča, vláček, bukové kostky, domeček pro panenky, tahací pejsek).
+    - Implementována JPA entita `Product` se striktními Javadoc komentáři, timestampy (`@PrePersist`, `@PreUpdate`) a soft-delete příznakem `isActive`.
+    - Vytvořen Spring Data JPA repozitář `ProductRepository` s vyhledáváním dle SKU a filtrem položek s minimální bezpečnou zásobou.
+  - **Fáze 3 (Byznys vrstva):**
+    - Vytvořeny přepravky dat `ProductCreateDto`, `ProductUpdateDto` a `ProductResponseDto` (s kalkulací absolutní a procentuální marže).
+    - Vytvořena hierarchie doménových výjimek: `ResourceNotFoundException` (404), `DuplicateSkuException` (409), `BusinessValidationException` (422) a `ErrorResponse` ve stylu RFC 7807 Problem Details.
+    - Implementován `GlobalExceptionHandler` pro jednotné a bezpečné zpracování chyb a validačních selhání formulářů.
+    - Implementováno rozhraní `ProductService` a servisní třída `ProductServiceImpl` ošetřující pravidla unikátnosti SKU a zákazu záporné marže.
+  - **Fáze 4 (Prezentační vrstva & UI):**
+    - Implementován REST Controller `ProductController` s kompletní sadou CRUD endpointů a pohledem na položky pod limitem minimální zásoby (`/alerts/low-stock`).
+    - Nastavena OpenAPI 3 / Swagger dokumentace v konfigurační třídě `OpenApiConfig`.
+    - Do webového rozhraní `index.html` integrován modální formulář pro přidání nové dřevěné hračky s okamžitým zobrazením validačních hlášek u jednotlivých polí (bez AI klišé, seriózní firemní vzhled).
+  - **Fáze 5 (Kontejnerizace):**
+    - Vytvořen multi-stage `Dockerfile` s buildem přes Maven a minimálním runtime Eclipse Temurin JRE 21 s neprivilegovaným uživatelem.
+    - Vytvořen `docker-compose.yml` orchestrující PostgreSQL 16 kontejner s perzistentním volume a healthcheckem a backendovou aplikaci.
+  - **Fáze 6 (Testování):**
+    - Vytvořeny unit testy `ProductServiceTest` (8 testovacích scénářů pokrývajících unikátnost SKU, kalkulaci marží, soft-delete i výjimky).
+    - Vytvořeny integrační testy `ProductControllerTest` (10 testů testujících REST API a HTTP stavové kódy 200, 201, 400, 404, 409, 422).
+    - Všech 19 automatizovaných testů úspěšně prochází (`BUILD SUCCESS`).
+  - **Fáze 7 (Dokumentace & Plán):**
+    - Aktualizován implementační plán `IMPLEMENTATION_PLAN.md` (odškrtnuty všechny body Milestone 1).
+    - Zaznamenán postup a návody do `README.md`.
+  - **Rozšíření Milestone 2 (Stavy zásob, sklady, kategorie M:N a doobjednávky):**
+    - **Reálné počty zásob po skladech:** Vytvořena migrace `V3__create_warehouses_categories_and_stock.sql` a seedovací migrace `V4__seed_warehouses_categories_and_stock.sql`. Sortiment má nyní realistické skladové zásoby: Káča (30 ks celkem: 18 Hradec, 12 Třebechovice – stav V pořádku), Kostky (34 ks celkem – stav V pořádku), Pejsek Bobík (25 ks celkem – stav V pořádku), Vláček (13 ks celkem – Nízký stav) a Domeček pro panenky (3 ks celkem, min limit 3 ks, ale 5 ks je na cestě od truhláře).
+    - **Zboží na cestě (Doobjednání u dodavatele):** Doplněna evidence `incomingQuantity` a nový stav zásoby `ON_ORDER` (klidný modrý badge *„Na cestě (X ks)“*). Pokud je zásoba pod minimem, ale zboží je již doobjednáno, systém nestraší červeným poplachem.
+    - **Operace doobjednání a naskladnění:** Implementovány endpointy `POST /api/v1/products/{id}/order-supply` a `POST /api/v1/products/{id}/receive-supply` se servisní logikou v `ProductServiceImpl`.
+    - **Interaktivní UI:** Do webového rozhraní přidány dialogy pro okamžité doobjednání hračky u dodavatele a pro fyzické naskladnění doručené zásilky na zvolený sklad (Hradec Králové vs. Třebechovice) s dynamickou aktualizací rozpadu zásob.
+    - **Nové entity a repozitáře:** Vytvořeny entity `Warehouse`, `Category` (vazba M:N přes `product_categories`), `StockItem` a jejich Spring Data JPA repozitáře.
+    - **Testovací pokrytí:** Testovací sada rozšířena na **22 automatizovaných testů** (všechny prochází na 100 %).
+
 

@@ -107,13 +107,10 @@ spring:
     # Pozn.: database-platform (dialect) pro H2 se záměrně neuvádí –
     # Hibernate jej detekuje automaticky (ruční uvedení by generovalo deprecation warning HHH90000025).
     hibernate:
-      # 'create-drop': Hibernate vytvoří schéma při startu a smaže při vypnutí.
-      # Bezpečné pro vývojový H2 profil – slouží pouze pro ověření startu aplikace.
-      # Flyway migrace jsou vypnuty, proto schéma spravuje Hibernate.
-      ddl-auto: create-drop
+      # Striktní pravidlo PPRO: Schéma spravuje výhradně Flyway, Hibernate jej pouze validuje
+      ddl-auto: validate
     show-sql: true
 
   flyway:
-    # H2 in-memory profil: Flyway je záměrně vypnut.
-    # Migrace jsou určeny výhradně pro PostgreSQL (profily local a docker).
-    enabled: false
+    # Flyway je povolen i pro H2 in-memory profil – zajišťuje shodné chování a automatické nasazení seedu
+    enabled: true

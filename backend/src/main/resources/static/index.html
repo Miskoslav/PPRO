@@ -538,6 +538,12 @@
       border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
+    .badge-on-order {
+      background: rgba(59, 130, 246, 0.12);
+      color: #60a5fa;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
     /* Prázdný stav a informační panely */
     .empty-state {
       text-align: center;
@@ -618,6 +624,132 @@
       .overlay.active {
         display: block;
       }
+    }
+
+    /* Modal formulář pro přidání / úpravu produktů */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(2px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-dialog {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      animation: modalFadeIn 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 0.25rem;
+    }
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+    .modal-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .form-control {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 0.55rem 0.75rem;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+    .form-control.is-invalid {
+      border-color: var(--stock-critical);
+    }
+    .form-error {
+      font-size: 0.75rem;
+      color: var(--stock-critical);
+      margin-top: 0.2rem;
+    }
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .modal-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      background: rgba(0, 0, 0, 0.15);
+    }
+    .alert-banner {
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      display: none;
+    }
+    .alert-banner.error {
+      display: block;
+      background: var(--stock-crit-bg);
+      border: 1px solid var(--stock-critical);
+      color: #fca5a5;
+    }
+    .alert-banner.success {
+      display: block;
+      background: var(--stock-ok-bg);
+      border: 1px solid var(--stock-ok);
+      color: #86efac;
     }
   </style>
 </head>
@@ -854,11 +986,14 @@
             <span class="table-toolbar-title">Seznam produktů</span>
             <span style="font-size:0.8rem;color:var(--text-muted);" id="products-count"></span>
           </div>
-          <div class="search-box">
-            <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" class="search-input" id="product-search" placeholder="Hledat podle SKU nebo názvu…" oninput="filterProducts()" />
+          <div style="display:flex;gap:0.75rem;align-items:center;">
+            <div class="search-box">
+              <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" class="search-input" id="product-search" placeholder="Hledat podle SKU nebo názvu…" oninput="filterProducts()" />
+            </div>
+            <button class="btn btn-primary" onclick="openCreateProductModal()">Přidat novou hračku</button>
           </div>
         </div>
 
@@ -868,16 +1003,19 @@
               <tr>
                 <th>SKU kód</th>
                 <th>Název produktu</th>
+                <th>Kategorie</th>
                 <th>Nákupní cena</th>
                 <th>Prodejní cena</th>
                 <th>Marže</th>
-                <th>Minimální zásoba</th>
+                <th>Skladem</th>
+                <th>Min. zásoba</th>
                 <th>Stav zásoby</th>
+                <th>Akce</th>
               </tr>
             </thead>
             <tbody id="products-tbody">
               <tr>
-                <td colspan="7">
+                <td colspan="10">
                   <div class="empty-state">
                     <strong>Katalog je připraven k napojení na databázi.</strong>
                     <p>Po spuštění migrací a vložení produktů se zde zobrazí kompletní přehled sortimentu.</p>
@@ -907,15 +1045,16 @@
               <tr>
                 <th>SKU</th>
                 <th>Produkt</th>
-                <th>Aktuální sklad</th>
+                <th>Aktuální zásoba</th>
                 <th>Minimální limit</th>
                 <th>Chybějící množství</th>
                 <th>Stav</th>
+                <th>Rychlá akce</th>
               </tr>
             </thead>
             <tbody id="alerts-tbody">
               <tr>
-                <td colspan="6">
+                <td colspan="7">
                   <div class="empty-state">
                     <p>Nebyly nalezeny žádné produkty pod minimální bezpečnou zásobou.</p>
                   </div>
@@ -1033,6 +1172,141 @@
   </main>
 </div>
 
+<!-- MODAL: Přidání nového produktu do katalogu -->
+<div class="modal-backdrop" id="modal-create-product">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Přidat novou dřevěnou hračku</h3>
+      <button type="button" class="modal-close" onclick="closeCreateProductModal()">&times;</button>
+    </div>
+    <form id="form-create-product" onsubmit="submitCreateProduct(event)">
+      <div class="modal-body">
+        <div class="alert-banner" id="modal-alert"></div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="prod-sku">SKU kód *</label>
+            <input type="text" class="form-control" id="prod-sku" placeholder="např. HRA-KAC-002" required />
+            <div class="form-error" id="err-sku"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-name">Název hračky *</label>
+            <input type="text" class="form-control" id="prod-name" placeholder="např. Dřevěná káča přírodní" required />
+            <div class="form-error" id="err-name"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prod-desc">Popis a materiál</label>
+          <textarea class="form-control" id="prod-desc" rows="2" placeholder="Popis hračky, bukové dřevo, certifikace…"></textarea>
+          <div class="form-error" id="err-description"></div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="prod-purchasePrice">Nákupní cena (Kč) *</label>
+            <input type="number" step="0.01" min="0" class="form-control" id="prod-purchasePrice" placeholder="45.00" required />
+            <div class="form-error" id="err-purchasePrice"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-sellingPrice">Prodejní cena (Kč) *</label>
+            <input type="number" step="0.01" min="0" class="form-control" id="prod-sellingPrice" placeholder="99.00" required />
+            <div class="form-error" id="err-sellingPrice"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prod-minStockLevel">Minimální bezpečná zásoba (ks) *</label>
+          <input type="number" min="0" class="form-control" id="prod-minStockLevel" value="5" required />
+          <div class="form-error" id="err-minStockLevel"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeCreateProductModal()">Zrušit</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-product">Uložit hračku</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Doobjednat zboží u dodavatele -->
+<div class="modal-backdrop" id="modal-order-supply">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Doobjednat zboží u dodavatele</h3>
+      <button type="button" class="modal-close" onclick="closeOrderSupplyModal()">&times;</button>
+    </div>
+    <form id="form-order-supply" onsubmit="submitOrderSupply(event)">
+      <div class="modal-body">
+        <div class="alert-banner" id="order-supply-alert"></div>
+        <input type="hidden" id="order-supply-id" />
+        
+        <p style="color:var(--text-secondary);font-size:0.85rem;">
+          Objednávka nového zboží u truhláře / dodavatele pro hračku:
+        </p>
+        <div style="font-weight:600;font-size:1.05rem;color:var(--text-primary);padding:0.25rem 0 0.75rem;" id="order-supply-prod-name"></div>
+
+        <div class="form-group">
+          <label class="form-label" for="order-supply-qty">Počet kusů k doobjednání *</label>
+          <input type="number" min="1" class="form-control" id="order-supply-qty" value="10" required />
+          <div class="form-error" id="err-order-supply-qty"></div>
+        </div>
+
+        <div style="font-size:0.78rem;color:var(--text-muted);background:#1e293b;padding:0.65rem 0.85rem;border-radius:var(--radius-sm);border:1px solid var(--border);">
+          Informativní stav: U produktu se nastaví příznak <strong>„Na cestě“</strong>. Systém nebude strašit červeným kritickým stavem, protože dodávka je již v procesu.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeOrderSupplyModal()">Zrušit</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-order-supply">Závazně doobjednat</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Naskladnit doručené zboží -->
+<div class="modal-backdrop" id="modal-receive-supply">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Naskladnit doručenou zásilku</h3>
+      <button type="button" class="modal-close" onclick="closeReceiveSupplyModal()">&times;</button>
+    </div>
+    <form id="form-receive-supply" onsubmit="submitReceiveSupply(event)">
+      <div class="modal-body">
+        <div class="alert-banner" id="receive-supply-alert"></div>
+        <input type="hidden" id="receive-supply-id" />
+
+        <p style="color:var(--text-secondary);font-size:0.85rem;">
+          Příjem doručeného zboží od dodavatele pro hračku:
+        </p>
+        <div style="font-weight:600;font-size:1.05rem;color:var(--text-primary);padding:0.25rem 0 0.75rem;" id="receive-supply-prod-name"></div>
+
+        <div class="form-group">
+          <label class="form-label" for="receive-supply-warehouse">Cílový sklad příjmu *</label>
+          <select class="form-control" id="receive-supply-warehouse" required>
+            <option value="1">Hlavní sklad Hradec Králové (expedice)</option>
+            <option value="2">Sklad Třebechovice pod Orebem (garáž / sezóna)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="receive-supply-qty">Počet fyzicky doručených kusů *</label>
+          <input type="number" min="1" class="form-control" id="receive-supply-qty" value="10" required />
+          <div class="form-error" id="err-receive-supply-qty"></div>
+        </div>
+
+        <div style="font-size:0.78rem;color:var(--text-muted);background:#1e293b;padding:0.65rem 0.85rem;border-radius:var(--radius-sm);border:1px solid var(--border);">
+          Naskladněné kusy budou přičteny k fyzickému stavu na vybraném skladu a odečteny z množství vedeného „na cestě“.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeReceiveSupplyModal()">Zrušit</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-receive-supply">Naskladnit na sklad</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 /**
  * Informační systém Dřevěnka s.r.o.
@@ -1112,7 +1386,7 @@ async function loadProducts() {
   if (!data || !Array.isArray(data)) {
     productsCache = [];
     countEl.textContent = '';
-    tbody.innerHTML = `<tr><td colspan="7">
+    tbody.innerHTML = `<tr><td colspan="10">
       <div class="empty-state">
         <strong>Katalog je připraven k napojení na databázi.</strong>
         <p>Po spuštění migrací a vložení produktů se zde zobrazí kompletní přehled sortimentu.</p>
@@ -1131,7 +1405,7 @@ async function loadProducts() {
   let cntOk = 0, cntLow = 0, cntCrit = 0;
   data.forEach(p => {
     const level = getStockLevel(p);
-    if (level === 'ok') cntOk++;
+    if (level === 'ok' || level === 'on-order') cntOk++;
     else if (level === 'low') cntLow++;
     else cntCrit++;
   });
@@ -1153,38 +1427,75 @@ async function loadProducts() {
 }
 
 function getStockLevel(product) {
-  const qty = product.totalQuantity ?? 0;
+  const incoming = product.incomingQuantity ?? 0;
+  const avail = product.availableQuantity ?? (product.totalQuantity ?? 0);
   const min = product.minStockLevel ?? 0;
-  if (qty <= 0 || qty < min) return 'critical';
-  if (qty < min * 1.5) return 'low';
+
+  if (avail < min) {
+    if (incoming > 0) return 'on-order';
+    return 'critical';
+  }
+  if (avail < min * 1.5) return 'low';
   return 'ok';
 }
 
 function renderProductsTable(products) {
   const tbody = document.getElementById('products-tbody');
   if (products.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Hledání neodpovídá žádný produkt.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><p>Hledání neodpovídá žádný produkt.</p></div></td></tr>`;
     return;
   }
 
   tbody.innerHTML = products.map(p => {
     const level = getStockLevel(p);
     let badgeHtml = '<span class="badge badge-ok">V pořádku</span>';
-    if (level === 'low') badgeHtml = '<span class="badge badge-low">Nízký stav</span>';
-    else if (level === 'critical') badgeHtml = '<span class="badge badge-critical">Kritický stav</span>';
+    if (level === 'on-order') {
+      badgeHtml = `<span class="badge badge-on-order">Na cestě (${p.incomingQuantity} ks)</span>`;
+    } else if (level === 'low') {
+      badgeHtml = '<span class="badge badge-low">Nízký stav</span>';
+    } else if (level === 'critical') {
+      badgeHtml = '<span class="badge badge-critical">Kritický stav</span>';
+    }
 
     const margin = p.sellingPrice && p.purchasePrice
       ? (((p.sellingPrice - p.purchasePrice) / p.sellingPrice) * 100).toFixed(1) + ' %'
       : '–';
 
+    const categoriesHtml = (p.categories && p.categories.length > 0)
+      ? p.categories.map(c => `<span style="display:inline-block;padding:0.1rem 0.4rem;font-size:0.7rem;background:#1e293b;border:1px solid var(--border-light);border-radius:3px;margin:1px;">${esc(c)}</span>`).join('')
+      : '<span style="color:var(--text-muted);">–</span>';
+
+    let stockDetail = `<strong>${p.availableQuantity ?? (p.totalQuantity ?? 0)} ks</strong>`;
+    if (p.totalQuantity != null && p.availableQuantity != null && p.totalQuantity !== p.availableQuantity) {
+      stockDetail += ` <span style="font-size:0.75rem;color:var(--text-muted);">(fyzicky ${p.totalQuantity} ks)</span>`;
+    }
+
+    if (p.warehouseStock && Object.keys(p.warehouseStock).length > 0) {
+      const parts = Object.entries(p.warehouseStock).map(([wh, q]) => {
+        const shortWh = wh.includes('Hradec') ? 'Hradec' : (wh.includes('Třebechovice') ? 'Třebechovice' : wh);
+        return `${shortWh}: ${q} ks`;
+      });
+      stockDetail += `<div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px;">${parts.join(' | ')}</div>`;
+    }
+
+    let actionsHtml = `<div style="display:flex;gap:0.35rem;align-items:center;">
+      <button class="btn btn-secondary" style="padding:0.25rem 0.55rem;font-size:0.75rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat</button>`;
+    if (p.incomingQuantity && p.incomingQuantity > 0) {
+      actionsHtml += `<button class="btn btn-primary" style="padding:0.25rem 0.55rem;font-size:0.75rem;" onclick="openReceiveSupplyModal(${p.id}, '${esc(p.name)}', ${p.incomingQuantity})">Naskladnit</button>`;
+    }
+    actionsHtml += `</div>`;
+
     return `<tr>
       <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
       <td style="font-weight:600;">${esc(p.name || '–')}</td>
+      <td>${categoriesHtml}</td>
       <td>${p.purchasePrice != null ? p.purchasePrice.toFixed(2) + ' Kč' : '–'}</td>
       <td>${p.sellingPrice != null ? p.sellingPrice.toFixed(2) + ' Kč' : '–'}</td>
       <td>${margin}</td>
+      <td>${stockDetail}</td>
       <td>${p.minStockLevel ?? '–'} ks</td>
       <td>${badgeHtml}</td>
+      <td>${actionsHtml}</td>
     </tr>`;
   }).join('');
 }
@@ -1204,41 +1515,178 @@ async function loadAlerts() {
   const dashTable = document.getElementById('dash-alerts-table');
 
   if (!data || !Array.isArray(data) || data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p></div></td></tr>`;
     dashTable.innerHTML = `<div class="empty-state"><p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p></div>`;
     return;
   }
 
   tbody.innerHTML = data.map(p => {
-    const qty = p.totalQuantity ?? 0;
+    const qty = p.availableQuantity ?? (p.totalQuantity ?? 0);
     const min = p.minStockLevel ?? 0;
     const diff = min - qty;
+    const level = getStockLevel(p);
+
+    let statusHtml = '<span class="badge badge-critical">Kritický stav</span>';
+    if (level === 'on-order') {
+      statusHtml = `<span class="badge badge-on-order">Na cestě (${p.incomingQuantity} ks)</span>`;
+    } else if (level === 'low') {
+      statusHtml = '<span class="badge badge-low">Nízký stav</span>';
+    }
+
+    let actionBtn = `<button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat</button>`;
+    if (p.incomingQuantity && p.incomingQuantity > 0) {
+      actionBtn = `<button class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="openReceiveSupplyModal(${p.id}, '${esc(p.name)}', ${p.incomingQuantity})">Naskladnit</button>`;
+    }
+
     return `<tr>
       <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
       <td style="font-weight:600;">${esc(p.name || '–')}</td>
       <td>${qty} ks</td>
       <td>${min} ks</td>
-      <td style="color:var(--stock-critical);font-weight:600;">-${diff} ks</td>
-      <td><span class="badge badge-critical">Kritický stav</span></td>
+      <td style="color:${diff > 0 ? 'var(--stock-critical)' : 'var(--stock-low)'};font-weight:600;">-${diff > 0 ? diff : 0} ks</td>
+      <td>${statusHtml}</td>
+      <td>${actionBtn}</td>
     </tr>`;
   }).join('');
 
   dashTable.innerHTML = `<div style="overflow-x:auto;">
     <table>
       <thead>
-        <tr><th>SKU</th><th>Produkt</th><th>Zásoba</th><th>Minimum</th><th>Stav</th></tr>
+        <tr><th>SKU</th><th>Produkt</th><th>Zásoba</th><th>Minimum</th><th>Stav</th><th>Akce</th></tr>
       </thead>
       <tbody>
-        ${data.slice(0, 5).map(p => `<tr>
-          <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
-          <td style="font-weight:600;">${esc(p.name || '–')}</td>
-          <td>${p.totalQuantity ?? 0} ks</td>
-          <td>${p.minStockLevel ?? 0} ks</td>
-          <td><span class="badge badge-critical">Kritický stav</span></td>
-        </tr>`).join('')}
+        ${data.slice(0, 5).map(p => {
+          const level = getStockLevel(p);
+          let st = '<span class="badge badge-critical">Kritický stav</span>';
+          if (level === 'on-order') st = `<span class="badge badge-on-order">Na cestě (${p.incomingQuantity} ks)</span>`;
+          else if (level === 'low') st = '<span class="badge badge-low">Nízký stav</span>';
+
+          let act = `<button class="btn btn-secondary" style="padding:0.2rem 0.45rem;font-size:0.72rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat</button>`;
+          if (p.incomingQuantity && p.incomingQuantity > 0) {
+            act = `<button class="btn btn-primary" style="padding:0.2rem 0.45rem;font-size:0.72rem;" onclick="openReceiveSupplyModal(${p.id}, '${esc(p.name)}', ${p.incomingQuantity})">Naskladnit</button>`;
+          }
+
+          return `<tr>
+            <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+            <td style="font-weight:600;">${esc(p.name || '–')}</td>
+            <td>${p.availableQuantity ?? (p.totalQuantity ?? 0)} ks</td>
+            <td>${p.minStockLevel ?? 0} ks</td>
+            <td>${st}</td>
+            <td>${act}</td>
+          </tr>`;
+        }).join('')}
       </tbody>
     </table>
   </div>`;
+}
+
+function openOrderSupplyModal(id, name) {
+  document.getElementById('order-supply-id').value = id;
+  document.getElementById('order-supply-prod-name').textContent = name;
+  document.getElementById('order-supply-qty').value = '10';
+  const alertEl = document.getElementById('order-supply-alert');
+  alertEl.className = 'alert-banner';
+  alertEl.textContent = '';
+  document.getElementById('modal-order-supply').classList.add('open');
+}
+
+function closeOrderSupplyModal() {
+  document.getElementById('modal-order-supply').classList.remove('open');
+}
+
+async function submitOrderSupply(event) {
+  event.preventDefault();
+  const id = document.getElementById('order-supply-id').value;
+  const qty = parseInt(document.getElementById('order-supply-qty').value, 10);
+  const alertEl = document.getElementById('order-supply-alert');
+  const btn = document.getElementById('btn-submit-order-supply');
+
+  if (isNaN(qty) || qty <= 0) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Zadejte platný kladný počet kusů.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Objednávám…';
+
+  try {
+    const res = await fetch(`/api/v1/products/${id}/order-supply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity: qty })
+    });
+    if (res.ok) {
+      closeOrderSupplyModal();
+      await loadProducts();
+      await loadAlerts();
+    } else {
+      const err = await res.json();
+      alertEl.className = 'alert-banner error';
+      alertEl.textContent = err.message || 'Chyba při odeslání objednávky.';
+    }
+  } catch (e) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Nepodařilo se spojit se serverem.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Závazně doobjednat';
+  }
+}
+
+function openReceiveSupplyModal(id, name, incomingQty) {
+  document.getElementById('receive-supply-id').value = id;
+  document.getElementById('receive-supply-prod-name').textContent = name;
+  document.getElementById('receive-supply-qty').value = incomingQty || 10;
+  const alertEl = document.getElementById('receive-supply-alert');
+  alertEl.className = 'alert-banner';
+  alertEl.textContent = '';
+  document.getElementById('modal-receive-supply').classList.add('open');
+}
+
+function closeReceiveSupplyModal() {
+  document.getElementById('modal-receive-supply').classList.remove('open');
+}
+
+async function submitReceiveSupply(event) {
+  event.preventDefault();
+  const id = document.getElementById('receive-supply-id').value;
+  const warehouseId = parseInt(document.getElementById('receive-supply-warehouse').value, 10);
+  const qty = parseInt(document.getElementById('receive-supply-qty').value, 10);
+  const alertEl = document.getElementById('receive-supply-alert');
+  const btn = document.getElementById('btn-submit-receive-supply');
+
+  if (isNaN(qty) || qty <= 0) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Zadejte platný kladný počet kusů k naskladnění.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Naskladňuji…';
+
+  try {
+    const res = await fetch(`/api/v1/products/${id}/receive-supply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ warehouseId, quantity: qty })
+    });
+    if (res.ok) {
+      closeReceiveSupplyModal();
+      await loadProducts();
+      await loadAlerts();
+    } else {
+      const err = await res.json();
+      alertEl.className = 'alert-banner error';
+      alertEl.textContent = err.message || 'Chyba při naskladnění.';
+    }
+  } catch (e) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Nepodařilo se spojit se serverem.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Naskladnit na sklad';
+  }
 }
 
 function esc(str) {
@@ -1258,6 +1706,89 @@ function refreshAll() {
       btn.textContent = 'Obnovit data';
       btn.disabled = false;
     });
+}
+
+function openCreateProductModal() {
+  document.getElementById('modal-create-product').classList.add('open');
+  clearModalErrors();
+  document.getElementById('form-create-product').reset();
+  document.getElementById('prod-minStockLevel').value = '5';
+  document.getElementById('prod-sku').focus();
+}
+
+function closeCreateProductModal() {
+  document.getElementById('modal-create-product').classList.remove('open');
+  clearModalErrors();
+}
+
+function clearModalErrors() {
+  const alertEl = document.getElementById('modal-alert');
+  alertEl.className = 'alert-banner';
+  alertEl.textContent = '';
+  document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+  document.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-invalid'));
+}
+
+async function submitCreateProduct(event) {
+  event.preventDefault();
+  clearModalErrors();
+
+  const sku = document.getElementById('prod-sku').value.trim();
+  const name = document.getElementById('prod-name').value.trim();
+  const description = document.getElementById('prod-desc').value.trim();
+  const purchasePrice = parseFloat(document.getElementById('prod-purchasePrice').value);
+  const sellingPrice = parseFloat(document.getElementById('prod-sellingPrice').value);
+  const minStockLevel = parseInt(document.getElementById('prod-minStockLevel').value, 10);
+
+  const payload = {
+    sku,
+    name,
+    description: description || null,
+    purchasePrice: isNaN(purchasePrice) ? null : purchasePrice,
+    sellingPrice: isNaN(sellingPrice) ? null : sellingPrice,
+    minStockLevel: isNaN(minStockLevel) ? 0 : minStockLevel,
+    isActive: true
+  };
+
+  const submitBtn = document.getElementById('btn-submit-product');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Ukládám…';
+
+  try {
+    const res = await fetch('/api/v1/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (res.status === 201) {
+      closeCreateProductModal();
+      await loadProducts();
+      await loadAlerts();
+    } else {
+      const alertEl = document.getElementById('modal-alert');
+      alertEl.classList.add('error');
+      alertEl.textContent = data.message || 'Chyba při ukládání hračky do katalogu.';
+
+      if (data.fieldErrors) {
+        Object.entries(data.fieldErrors).forEach(([field, msg]) => {
+          const errEl = document.getElementById('err-' + field);
+          if (errEl) errEl.textContent = msg;
+          const inputEl = document.getElementById('prod-' + field);
+          if (inputEl) inputEl.classList.add('is-invalid');
+        });
+      }
+    }
+  } catch (err) {
+    const alertEl = document.getElementById('modal-alert');
+    alertEl.classList.add('error');
+    alertEl.textContent = 'Nepodařilo se navázat spojení se serverem.';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Uložit hračku';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
