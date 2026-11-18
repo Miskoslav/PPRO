@@ -99,6 +99,14 @@ public class ProductController {
         return ResponseEntity.ok(alerts);
     }
 
+    @GetMapping("/alerts/approaching-low")
+    @Operation(summary = "Položky blížící se k minimu", description = "Vrátí seznam produktů, u kterých se zásoba blíží k minimálnímu bezpečnému limitu.")
+    @ApiResponse(responseCode = "200", description = "Seznam položek blížících se k minimu")
+    public ResponseEntity<List<ProductResponseDto>> getApproachingLowStockAlerts() {
+        List<ProductResponseDto> alerts = productService.getApproachingLowStockAlerts();
+        return ResponseEntity.ok(alerts);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Vytvořit nový produkt", description = "Zaregistruje novou dřevěnou hračku do katalogu s validací unikátnosti SKU a nezáporné marže.")

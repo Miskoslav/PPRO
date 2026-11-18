@@ -151,15 +151,15 @@ erDiagram
 
 | Požadavek | Stav | Poznámka k realizaci |
 | :--- | :---: | :--- |
-| **Tři vrstvy se závislostmi jedním směrem** | ✅ Hotovo | `ProductController` $\rightarrow$ `ProductService` $\rightarrow$ `ProductRepository` |
+| **Tři vrstvy se závislostmi jedním směrem** | ✅ Hotovo | `*Controller` $\rightarrow$ `*Service` $\rightarrow$ `*Repository` (žádné obcházení vrstev) |
 | **Relační databáze v Dockeru** | ✅ Připraveno | PostgreSQL 16 kontejner v `docker-compose.yml` s perzistentním volume |
-| **Databázové migrace** | ✅ Hotovo | Verzované Flyway migrace (`V1__create_products_table.sql`, `V2__seed_demo_products.sql`) |
-| **Nejméně 5 entit** | ⏳ Rozpracováno | 4 entity hotovy (`Product`, `Warehouse`, `Category`, `StockItem`); zbývající doménové entity (`Customer`, `Order`, `OrderItem`, `StockMovement`) v přípravě pro M3 |
+| **Databázové migrace** | ✅ Hotovo | 6 verzovaných Flyway migrací (`V1` až `V6`) |
+| **Nejméně 5 entit** | ✅ Hotovo | **7 plnohodnotných entit:** `Product`, `Category`, `Warehouse`, `StockItem`, `Customer`, `Order`, `OrderItem` |
 | **Alespoň jedna vazba M:N** | ✅ Hotovo | Plně funkční vazba M:N mezi `Product` a `Category` (`product_categories`) v DB i v JPA modelu |
-| **Automatizované testy** | ✅ Hotovo | 22 automatizovaných testů (unit testy byznys pravidel, doobjednávek a marží, integrační testy REST API a kontextu) |
-| **Spuštění příkazem `docker compose up`** | ✅ Hotovo | Multi-stage `Dockerfile` a `docker-compose.yml` s healthcheckem databáze |
+| **Automatizované testy** | ✅ Hotovo | **28 automatizovaných testů** (unit testy byznys pravidel, doobjednávek, rezervací, split fulfillmentu, odmítnutí prodeje neexistujícího zboží, integrační testy REST API a kontextu) |
+| **Spuštění příkazem `docker compose up`** | ✅ Hotovo | Multi-stage `Dockerfile` (s cache závislostí a healthcheckem) a `docker-compose.yml` s izolovanou bridge sítí a perzistentním volume |
 | **Technická dokumentace v README.md** | ✅ Hotovo | Detailní zadání, pravidla, rozhodnutí k otevřeným bodům, technický deník (SSOT) |
-| **Syntetická data (žádné osobní/citlivé údaje)** | ✅ Zajištěno | Výhradně fiktivní sortiment dřevěných hraček Dřevěnky (káča, vláček, kostky, domeček, pejsek) |
+| **Syntetická data (žádné osobní/citlivé údaje)** | ✅ Zajištěno | Výhradně fiktivní sortiment dřevěných hraček a fiktivní zákazníci Dřevěnky s.r.o. |
 
 ---
 
@@ -273,5 +273,25 @@ mvn test
     - **Interaktivní UI:** Do webového rozhraní přidány dialogy pro okamžité doobjednání hračky u dodavatele a pro fyzické naskladnění doručené zásilky na zvolený sklad (Hradec Králové vs. Třebechovice) s dynamickou aktualizací rozpadu zásob.
     - **Nové entity a repozitáře:** Vytvořeny entity `Warehouse`, `Category` (vazba M:N přes `product_categories`), `StockItem` a jejich Spring Data JPA repozitáře.
     - **Testovací pokrytí:** Testovací sada rozšířena na **22 automatizovaných testů** (všechny prochází na 100 %).
+
+- **2026-11-18:**
+  - **Dokončen Milestone 3 (Zákazníci, objednávky, dvoufázový rezervační model) & dotažení evaluace:**
+    - **Kritický bod zadání B realizován:** Implementován rezervační mechanismus, který atomicky rezervuje skladovou zásobu (`reserved_quantity++`) při zadání objednávky a zamezuje prodeji neexistujícího zboží (hlavní bolest klienta).
+    - **Migrace V5 a V6:** DDL tabulek `customers`, `orders` (stavy `CREATED`, `RESERVED`, `PROCESSING`, `DISPATCHED`, `CANCELLED`) a `order_items` se zafixovanou prodejní cenou `unit_price_at_purchase` + syntetický seed.
+    - **Nové entity a repozitáře (celkem 7 entit):** `Customer`, `Order`, `OrderItem` včetně JPA repozitářů `CustomerRepository`, `OrderRepository` a `OrderItemRepository`.
+    - **Servisní vrstva:** `OrderService` a `OrderServiceImpl` (ověření disponibilní zásoby, vygenerování `ORD-YYYY-XXXXX`, fixace cen, atomická rezervace, možnost storna s uvolněním rezervace).
+    - **REST API:** `OrderController` (`GET /api/v1/orders`, `GET /api/v1/orders/{id}`, `POST /api/v1/orders`, `POST /api/v1/orders/{id}/cancel`) a `CustomerController` (`GET /api/v1/customers`).
+    - **Oprava naskladnění (Validation Fix):** Ošetřena nahlášená chyba – nyní nelze naskladnit více kusů, než kolik bylo u truhláře skutečně objednáno (`quantity <= incomingQuantity`), jak na úrovni backendové validace (HTTP 422), tak v klientském rozhraní s nápovědou a maximem.
+    - **Přiřazení kategorií při vytváření produktu:** `ProductCreateDto` a `ProductServiceImpl` rozšířeny o `categoryIds` (vazba M:N). Ve formuláři nového produktu byl přidán výběr kategorií.
+    - **Vylepšení skladů a inventář:**
+      - Vytvořena servisní třída `WarehouseServiceImpl` a DTO modely `WarehouseSummaryDto`, `WarehouseInventoryItemDto`, `WarehouseCreateDto`.
+      - Endpointy `GET /api/v1/warehouses/summary` (součty fyzických, rezervovaných a volných zásob) a `GET /api/v1/warehouses/{id}/inventory` (podrobný inventář daného skladu).
+      - Do webového rozhraní přidána možnost rozkliknout sklad a zobrazit jeho kompletní inventář v samostatné tabulce a možnost přidat další sklad.
+    - **Vylepšení Dashboardu a Upozornění zásob:**
+      - V boxech skladů na Dashboardu i na stránce Sklady se nyní dynamicky zobrazují skutečné agregované počty (fyzicky, rezervováno, disponibilní).
+      - Na Dashboard i na stránku Upozornění zásob byl přidán dedikovaný oddíl pro položky, které se blíží k minimu (`LOW` stav), s rychlou akcí pro včasné doobjednání.
+    - **Split fulfillment (Objednávka ze dvou skladů):** Implementováno automatické rozdělení odběru a rezervací mezi sklady (např. 10 ks z Hradce a 4 ks z Třebechovic), pokud celková zásoba postačuje, ale žádný samostatný sklad nemá všechny kusy. V databázi i ve skladových zásobách se změna přesně zaznamená do příslušných skladů.
+    - **Předělání Dockeru:** Modernizován multi-stage `Dockerfile` (efektivní cachování Maven vrstev přes `dependency:resolve`, přidán `curl` pro kontejnerový healthcheck) a `docker-compose.yml` (přidán healthcheck pro backend i PostgreSQL, izolovaná bridge síť `drevenka-network`, optimalizace paměti JVM pro kontejnery).
+    - **Testovací pokrytí:** Sada rozšířena na **28 automatizovaných testů** (včetně testů pro split fulfillment a storno). Všechny testy prochází na 100 % (`BUILD SUCCESS`).
 
 

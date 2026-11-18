@@ -52,6 +52,14 @@ public interface ProductService {
     List<ProductResponseDto> getLowStockAlerts();
 
     /**
+     * Vrátí seznam položek, které se blíží k minimální zásobě (zásoba je mezi minimem
+     * a 1.5× minima). Umožňuje skladníkovi včas plánovat objednávky u truhláře.
+     *
+     * @return seznam produktů blížících se k minimu
+     */
+    List<ProductResponseDto> getApproachingLowStockAlerts();
+
+    /**
      * Zaregistruje nový produkt do katalogu Dřevěnky s.r.o.
      * Provádí byznys validaci unikátnosti SKU a nezáporné marže.
      *

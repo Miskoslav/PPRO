@@ -6,9 +6,11 @@ import cz.uhk.fim.ppro.warehouse.dto.ProductUpdateDto;
 import cz.uhk.fim.ppro.warehouse.exception.BusinessValidationException;
 import cz.uhk.fim.ppro.warehouse.exception.DuplicateSkuException;
 import cz.uhk.fim.ppro.warehouse.exception.ResourceNotFoundException;
+import cz.uhk.fim.ppro.warehouse.model.Category;
 import cz.uhk.fim.ppro.warehouse.model.Product;
 import cz.uhk.fim.ppro.warehouse.model.StockItem;
 import cz.uhk.fim.ppro.warehouse.model.Warehouse;
+import cz.uhk.fim.ppro.warehouse.repository.CategoryRepository;
 import cz.uhk.fim.ppro.warehouse.repository.ProductRepository;
 import cz.uhk.fim.ppro.warehouse.repository.StockItemRepository;
 import cz.uhk.fim.ppro.warehouse.repository.WarehouseRepository;
@@ -45,13 +47,16 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final StockItemRepository stockItemRepository;
     private final WarehouseRepository warehouseRepository;
+    private final CategoryRepository categoryRepository;
 
     public ProductServiceImpl(ProductRepository productRepository,
                               StockItemRepository stockItemRepository,
-                              WarehouseRepository warehouseRepository) {
+                              WarehouseRepository warehouseRepository,
+                              CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.stockItemRepository = stockItemRepository;
         this.warehouseRepository = warehouseRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -95,6 +100,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductResponseDto> getApproachingLowStockAlerts() {
+        log.debug("Vyhodnocení položek blížících se k minimální zásobě");
+
+        List<Product> products = productRepository.findByIsActiveTrueOrderByNameAsc();
+
+        return products.stream()
+                .map(this::toDto)
+                .filter(dto -> {
+                    int avail = dto.getAvailableQuantity();
+                    int min = dto.getMinStockLevel();
+                    return min > 0 && avail >= min && avail < (int) Math.ceil(min * 1.5);
+                })
+                .toList();
+    }
+
+    @Override
     @Transactional
     public ProductResponseDto createProduct(ProductCreateDto dto) {
         log.info("Vytváření nového produktu se SKU: '{}', název: '{}'", dto.getSku(), dto.getName());
@@ -119,6 +140,13 @@ public class ProductServiceImpl implements ProductService {
 
         if (dto.getIsActive() != null) {
             product.setIsActive(dto.getIsActive());
+        }
+
+        // 4. Přiřazení kategorií (vazba M:N) – pokud jsou zadány v požadavku
+        if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
+            List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+            product.setCategories(new java.util.HashSet<>(categories));
+            log.info("Přiřazeny kategorie {} k novému produktu '{}'", dto.getCategoryIds(), dto.getName());
         }
 
         Product savedProduct = productRepository.save(product);
@@ -199,6 +227,16 @@ public class ProductServiceImpl implements ProductService {
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sklad", "id", warehouseId));
 
+        // Byznys validace: nelze naskladnit více kusů, než bylo objednáno u dodavatele.
+        // Zabraňuje chybě, kdy skladník omylem zadá příliš vysoké číslo při příjmu zásilky.
+        int incoming = product.getIncomingQuantity() != null ? product.getIncomingQuantity() : 0;
+        if (incoming > 0 && quantity > incoming) {
+            throw new BusinessValidationException(String.format(
+                    "Naskladňujete %d ks, ale u dodavatele bylo objednáno pouze %d ks. " +
+                    "Naskladnit lze maximálně objednané množství.",
+                    quantity, incoming));
+        }
+
         // Nalezení nebo založení položky na daném skladu
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
                 .orElseGet(() -> new StockItem(product, warehouse, 0, 0));
@@ -208,7 +246,6 @@ public class ProductServiceImpl implements ProductService {
         stockItemRepository.save(stockItem);
 
         // Snížení množství na cestě
-        int incoming = product.getIncomingQuantity() != null ? product.getIncomingQuantity() : 0;
         product.setIncomingQuantity(Math.max(0, incoming - quantity));
         Product saved = productRepository.save(product);
 

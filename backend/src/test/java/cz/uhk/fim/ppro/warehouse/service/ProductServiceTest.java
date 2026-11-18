@@ -9,6 +9,7 @@ import cz.uhk.fim.ppro.warehouse.exception.ResourceNotFoundException;
 import cz.uhk.fim.ppro.warehouse.model.Product;
 import cz.uhk.fim.ppro.warehouse.model.StockItem;
 import cz.uhk.fim.ppro.warehouse.model.Warehouse;
+import cz.uhk.fim.ppro.warehouse.repository.CategoryRepository;
 import cz.uhk.fim.ppro.warehouse.repository.ProductRepository;
 import cz.uhk.fim.ppro.warehouse.repository.StockItemRepository;
 import cz.uhk.fim.ppro.warehouse.repository.WarehouseRepository;
@@ -50,6 +51,9 @@ class ProductServiceTest {
 
     @Mock
     private WarehouseRepository warehouseRepository;
+
+    @Mock
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -239,5 +243,35 @@ class ProductServiceTest {
         assertThat(stockItem.getPhysicalQuantity()).isEqualTo(25); // 10 + 15
         assertThat(sampleProduct.getIncomingQuantity()).isEqualTo(5);  // 20 - 15
         verify(stockItemRepository).save(stockItem);
+    }
+
+    @Test
+    @DisplayName("Naskladnění většího počtu kusů než bylo objednáno vyvolá výjimku")
+    void receiveSupply_shouldThrowException_whenQuantityExceedsIncoming() {
+        sampleProduct.setIncomingQuantity(5);
+        Warehouse warehouse = new Warehouse("HRADEC", "Hlavní sklad", "Brněnská");
+        warehouse.setId(1L);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.of(warehouse));
+
+        assertThatThrownBy(() -> productService.receiveSupply(1L, 1L, 40))
+                .isInstanceOf(BusinessValidationException.class)
+                .hasMessageContaining("Naskladňujete 40 ks, ale u dodavatele bylo objednáno pouze 5 ks");
+    }
+
+    @Test
+    @DisplayName("Položky blížící se k minimu se správně vyfiltrují")
+    void getApproachingLowStockAlerts_shouldReturnProductsNearMinimum() {
+        // minStockLevel = 15, zásoba = 18 ks (je >= 15 a < 23 = 15*1.5)
+        StockItem stockItem = new StockItem(sampleProduct, null, 18, 0);
+
+        when(productRepository.findByIsActiveTrueOrderByNameAsc()).thenReturn(List.of(sampleProduct));
+        when(stockItemRepository.findByProductIdWithWarehouse(1L)).thenReturn(List.of(stockItem));
+
+        List<ProductResponseDto> alerts = productService.getApproachingLowStockAlerts();
+
+        assertThat(alerts).hasSize(1);
+        assertThat(alerts.get(0).getName()).isEqualTo("Dřevěná káča pestrobarevná");
     }
 }

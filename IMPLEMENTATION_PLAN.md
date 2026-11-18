@@ -130,13 +130,80 @@ V této fázi rozšiřujeme systém o evidenci skladů (Hradec Králové vs. gar
   - Interaktivní dialog pro naskladnění doručené zásilky na zvolený sklad.
 
 ### Fáze 12: Automatizované testy a dokumentace
-- [x] **12.1** Unit testy v `ProductServiceTest` rozšířeny o doobjednávku a naskladnění (10 unit testů).
-- [x] **12.2** Integrační testy v `ProductControllerTest` rozšířeny o testy endpointů `/order-supply` a `/receive-supply` (12 integračních testů).
-- [x] **12.3** Aktualizace `README.md` a `IMPLEMENTATION_PLAN.md` (zaznamenáno nové byznys pravidlo č. 6 a stav).
+- [x] **12.1** Unit testy v `ProductServiceTest` rozšířeny o doobjednávku a naskladnění.
+- [x] **12.2** Integrační testy v `ProductControllerTest` rozšířeny o testy endpointů `/order-supply` a `/receive-supply`.
+- [x] **12.3** Aktualizace `README.md` a `IMPLEMENTATION_PLAN.md`.
+
+---
+
+## 🎯 Milestone 3: Zákazníci, objednávky a dvoufázový rezervační model (Kritický bod zadání B)
+
+V této fázi byl realizován klíčový invariant zadání B: zamezení prodeje neexistujícího zboží pomocí atomické rezervace zásob a fixace prodejních cen.
+
+### Fáze 13: Databázová vrstva pro Milestone 3 (Migrace V5 a V6)
+- [x] **13.1** Vytvoření migrace `V5__create_customers_orders.sql`:
+  - DDL tabulky `customers` (first_name, last_name, email, phone, adresa; zákazníci se nemažou).
+  - DDL tabulky `orders` (order_number, customer_id, status CHECK, total_price, note).
+  - DDL tabulky `order_items` s vazbou na produkt, sklad výdeje a zafixovanou cenou `unit_price_at_purchase`.
+- [x] **13.2** Vytvoření seedovací migrace `V6__seed_customers_and_orders.sql`:
+  - Syntetičtí zákazníci (Jana Horáčková, Tomáš Blažek, Markéta Svobodová a další).
+  - Ukázkové objednávky v různých fázích životního cyklu (`CREATED`, `RESERVED`, `PROCESSING`).
+  - Demonstrace navýšení `reserved_quantity` v `stock_items`.
+
+### Fáze 14: Doménový model a repozitáře pro Milestone 3
+- [x] **14.1** JPA entita `Customer` a repozitář `CustomerRepository`.
+- [x] **14.2** JPA entita `Order` se stavovým automatem `OrderStatus` a repozitář `OrderRepository`.
+- [x] **14.3** JPA entita `OrderItem` se zafixovanou cenou a repozitář `OrderItemRepository`.
+- [x] **14.4** Obohacení `ProductCreateDto` a `ProductServiceImpl` o přiřazení kategorií (vazba M:N).
+
+### Fáze 15: Servisní logika objednávek, skladů, split fulfillmentu a validace naskladnění
+- [x] **15.1** DTO modely: `OrderCreateDto`, `OrderResponseDto`, `WarehouseSummaryDto`, `WarehouseInventoryItemDto`, `WarehouseCreateDto`.
+- [x] **15.2** Byznys logika v `OrderServiceImpl`:
+  - Generování čitelného čísla objednávky (`ORD-YYYY-XXXXX`).
+  - **Atomická rezervace zásoby (`reserved_quantity++`)** s okamžitým snížením disponibilní zásoby.
+  - **Split fulfillment (Rozdělení odběru mezi sklady):** Pokud je zboží dostatek, ale je rozděleno ve více skladech (např. 10 ks v Hradci a 5 ks v Třebechovicích), systém objednávku nezamítne, nýbrž automaticky vykryje poptávku napříč sklady a provede rezervaci v příslušných skladech.
+  - **Odmítnutí objednávky (HTTP 422):** Pokud ani celková disponibilní zásoba ze všech skladů nestačí, objednávka je odmítnuta (klíčová ochrana proti prodeji neexistujícího zboží).
+  - **Zafixování prodejních cen:** `unit_price_at_purchase` fixuje cenu v době vytvoření objednávky nezávisle na budoucích změnách ceníku.
+  - **Stornování objednávky:** Bezpečné uvolnění rezervací zpět do disponibilního stavu na všech dotčených skladech.
+- [x] **15.3** Servisní logika skladů v `WarehouseServiceImpl`:
+  - Agregace fyzických, rezervovaných a volných zásob po skladech.
+  - Načtení detailního inventáře skladu (`getWarehouseInventory`).
+  - Možnost dynamického přidání dalšího skladu (`createWarehouse`).
+- [x] **15.4** Oprava naskladnění (Validation Fix):
+  - Zamezení naskladnění více kusů, než kolik bylo objednáno u dodavatele (`quantity <= incomingQuantity`), jak na backendu (HTTP 422), tak na frontendu.
+
+### Fáze 16: Prezentační vrstva a webové rozhraní (UI)
+- [x] **16.1** REST endpointy:
+  - `GET /api/v1/orders`, `GET /api/v1/orders/{id}`, `POST /api/v1/orders`, `POST /api/v1/orders/{id}/cancel`.
+  - `GET /api/v1/customers` (přehled zákazníků pro výběr v objednávce).
+  - `GET /api/v1/warehouses/summary`, `GET /api/v1/warehouses/{id}/inventory`, `POST /api/v1/warehouses`.
+  - `GET /api/v1/products/alerts/approaching-low` (položky blížící se k minimu).
+- [x] **16.2** Webové rozhraní (`index.html`):
+  - **Dashboard:** Reálná data v boxech skladů (fyzicky v regálech, rezervováno pro objednávky, volně k prodeji) + nová sekce pro zásoby blížící se k minimu + tlačítka pro zobrazení inventáře.
+  - **Produkty:** Výběr kategorií pomocí checkboxů při zakládání nové dřevěné hračky (vazba M:N).
+  - **Upozornění zásob:** Rozdělení na dva oddíly: kritické zásoby (pod minimem) a zásoby blížící se k minimu (doporučeno sledovat).
+  - **Sklady:** Možnost rozkliknout libovolný sklad a zobrazit kompletní inventář + tlačítko a formulář pro přidání nového skladu.
+  - **Objednávky:** Plně funkční správa zákaznických objednávek (přehled, storno, modální okno pro vytvoření objednávky s kalkulací ceny, podporou split fulfillmentu a okamžitou rezervací).
+  - **Naskladnění:** Vizuální limit a validace proti překročení objednaného množství.
+
+### Fáze 17: Automatizované testy a předělání kontejnerizace
+- [x] **17.1** Testy pro objednávky v `OrderServiceTest`:
+  - Test rezervace zásoby a fixace ceny.
+  - Test odmítnutí při nedostatku zásob napříč sklady.
+  - Test **Split fulfillmentu** – automatické rozdělení objednávky a rezervací mezi Hradec Králové a Třebechovice.
+  - Test uvolnění rezervací při stornu objednávky.
+- [x] **17.2** Unit testy v `ProductServiceTest`:
+  - Test zákazu naskladnění vyššího počtu kusů než bylo objednáno.
+  - Test vyfiltrování zásob blížících se k minimu (`getApproachingLowStockAlerts`).
+- [x] **17.3** Všech **28 automatizovaných testů** úspěšně prochází (`BUILD SUCCESS`).
+- [x] **17.4** Předělání Dockeru (`Dockerfile` a `docker-compose.yml`):
+  - Multi-stage build s efektivním cachováním závislostí `mvn dependency:resolve`.
+  - Doplněn `curl` a kontejnerový healthcheck pro backend (`/api/v1/health`) i databázi (`pg_isready`).
+  - Zavedena dedikovaná síť `drevenka-network` (bridge).
+  - Parametry JVM optimalizované pro kontejner (`MaxRAMPercentage=75.0`).
 
 ---
 
 ## 🔮 Výhled na další milestony (Rozšíření systému)
-- **Milestone 3:** Kritický bod zadání B – Rezervační mechanismus, nákupní objednávky (`Order`, `OrderItem`), odmítnutí při nedostatku zásob.
 - **Milestone 4:** Kniha skladových pohybů (`StockMovement`), převody mezi Hradcem a Třebechovicemi, modul Inventura.
 - **Milestone 5:** Měsíční statistiky obratu po kategoriích, exporty a optimalizace pro obhajobu.

@@ -1,16 +1,21 @@
 # ==============================================================================
 # Docker Compose konfigurace pro Skladový systém Dřevěnka s.r.o.
-# Projekt předmětu Pokročilé programování (PPRO) - FIM UHK
+# Projekt předmětu Pokročilé programování (PPRO) - FIM UHK (ZS 2026/2027)
 # ==============================================================================
-# Spuštění celého prostředí:
-#   docker compose up -d
+# Jednoduché spuštění celého prostředí jediným příkazem:
+#   docker compose up -d --build
 #
-# Zastavení:
+# Zastavení a úklid:
 #   docker compose down
+#
+# Zastavení včetně smazání databáze (čistý start):
+#   docker compose down -v
 # ==============================================================================
 
 services:
-  # Databázová služba: PostgreSQL 16
+  # ----------------------------------------------------------------------------
+  # 1. Relační databáze: PostgreSQL 16
+  # ----------------------------------------------------------------------------
   db:
     image: postgres:16-alpine
     container_name: drevenka-postgres
@@ -27,9 +32,14 @@ services:
       test: ["CMD-SHELL", "pg_isready -U warehouse_user -d drevenka_warehouse"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 5s
+    networks:
+      - drevenka-network
 
-  # Aplikační backend: Spring Boot 3 + webové rozhraní
+  # ----------------------------------------------------------------------------
+  # 2. Aplikační backend: Spring Boot 3 + REST API + SPA Webové UI
+  # ----------------------------------------------------------------------------
   backend:
     build:
       context: ./backend
@@ -44,10 +54,30 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/drevenka_warehouse
       SPRING_DATASOURCE_USERNAME: warehouse_user
       SPRING_DATASOURCE_PASSWORD: warehouse_secret_password
+      # JVM nastavení
+      JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - drevenka-network
 
+# ------------------------------------------------------------------------------
+# Perzistentní úložiště pro PostgreSQL databázi
+# ------------------------------------------------------------------------------
 volumes:
   postgres_data:
     name: drevenka_postgres_data
 
+# ------------------------------------------------------------------------------
+# Izolovaná síť pro bezpečné propojení služeb
+# ------------------------------------------------------------------------------
+networks:
+  drevenka-network:
+    name: drevenka-network
+    driver: bridge

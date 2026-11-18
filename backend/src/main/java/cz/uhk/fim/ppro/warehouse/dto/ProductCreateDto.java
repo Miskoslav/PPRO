@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Přepravka dat (Data Transfer Object) pro vytvoření nového produktu / hračky.
@@ -53,6 +55,13 @@ public class ProductCreateDto {
 
     @Schema(description = "Příznak okamžité aktivace v katalogu", example = "true", defaultValue = "true")
     private Boolean isActive = true;
+
+    /**
+     * Volitelný seznam ID kategorií, do nichž produkt patří (vazba M:N).
+     * Lze zadat více kategorií naráz (např. [1, 3] = „Pro batolata" + „Dárky do 500 Kč").
+     */
+    @Schema(description = "Seznam ID kategorií produktu (nepovinné)", example = "[1, 2]")
+    private List<Long> categoryIds = new ArrayList<>();
 
     public ProductCreateDto() {
     }
@@ -122,6 +131,14 @@ public class ProductCreateDto {
 
     public void setIsActive(Boolean active) {
         isActive = active;
+    }
+
+    public List<Long> getCategoryIds() {
+        return categoryIds;
+    }
+
+    public void setCategoryIds(List<Long> categoryIds) {
+        this.categoryIds = categoryIds != null ? categoryIds : new ArrayList<>();
     }
 }
 

@@ -931,7 +931,7 @@
       </div>
 
       <h3 class="section-title">Pobočky a sklady</h3>
-      <div class="warehouse-grid">
+      <div class="warehouse-grid" id="dash-warehouses-grid">
         <div class="warehouse-box">
           <div class="wh-box-title">Hlavní sklad</div>
           <div class="wh-box-code">Hradec Králové (HRADEC) · Běžný provoz a expedice</div>
@@ -944,6 +944,10 @@
               <p>Rezervováno</p>
               <strong id="wh-hradec-res">–</strong>
             </div>
+          </div>
+          <div style="margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.72rem;color:var(--text-muted);">Disponibilní zásoba: <b id="wh-hradec-avail" style="color:var(--stock-ok);">–</b></span>
+            <button class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.72rem;" onclick="viewWarehouseInventory(1, 'Hlavní sklad Hradec Králové')">Zobrazit inventář</button>
           </div>
         </div>
 
@@ -960,14 +964,27 @@
               <strong id="wh-treb-res">–</strong>
             </div>
           </div>
+          <div style="margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.72rem;color:var(--text-muted);">Disponibilní zásoba: <b id="wh-treb-avail" style="color:var(--stock-ok);">–</b></span>
+            <button class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.72rem;" onclick="viewWarehouseInventory(2, 'Sklad Třebechovice pod Orebem')">Zobrazit inventář</button>
+          </div>
         </div>
       </div>
 
-      <h3 class="section-title">Kritické zásoby k doobjednání</h3>
+      <h3 class="section-title">Kritické zásoby k doobjednání (pod bezpečným minimem)</h3>
       <div class="table-container">
         <div id="dash-alerts-table">
           <div class="empty-state">
             <p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-title" style="margin-top:1.5rem;">Zásoby blížící se k minimální hranici</h3>
+      <div class="table-container">
+        <div id="dash-low-table">
+          <div class="empty-state">
+            <p>Žádné položky se aktuálně neblíží k minimální zásobě.</p>
           </div>
         </div>
       </div>
@@ -1031,13 +1048,13 @@
     <!-- STRÁNKA: UPOZORNĚNÍ ZÁSOB -->
     <section class="page" id="page-alerts">
       <div class="page-header">
-        <h2 class="page-title">Upozornění na nízké zásoby</h2>
-        <p class="page-desc">Prioritní seznam položek, které klesly pod bezpečnou minimální úroveň</p>
+        <h2 class="page-title">Upozornění na stav zásob</h2>
+        <p class="page-desc">Prioritní přehled položek pod minimální bezpečnou zásobou a položek blížících se k minimu</p>
       </div>
 
       <div class="table-container">
         <div class="table-toolbar">
-          <span class="table-toolbar-title">Položky vyžadující objednávku u dodavatele</span>
+          <span class="table-toolbar-title" style="color:var(--stock-critical);">Kritický stav – zásoba pod bezpečným minimem</span>
         </div>
         <div style="overflow-x:auto;">
           <table>
@@ -1064,74 +1081,172 @@
           </table>
         </div>
       </div>
+
+      <div class="table-container" style="margin-top:1.5rem;">
+        <div class="table-toolbar">
+          <span class="table-toolbar-title" style="color:var(--stock-low);">Blíží se k minimální zásobě (doporučeno sledovat)</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Produkt</th>
+                <th>Aktuální zásoba</th>
+                <th>Minimální limit</th>
+                <th>Rezerva nad minimem</th>
+                <th>Stav</th>
+                <th>Rychlá akce</th>
+              </tr>
+            </thead>
+            <tbody id="alerts-low-tbody">
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <p>Žádné položky se aktuálně neblíží k minimální zásobě.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <!-- STRÁNKA: SKLADY -->
     <section class="page" id="page-warehouses">
-      <div class="page-header">
-        <h2 class="page-title">Správa skladů</h2>
-        <p class="page-desc">Přehled evidenčních míst a přesunů zboží mezi sklady</p>
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h2 class="page-title">Správa skladů a inventář</h2>
+          <p class="page-desc">Přehled evidenčních míst, celkových stavů zásob a detailních inventářů</p>
+        </div>
+        <div>
+          <button class="btn btn-secondary" onclick="openCreateWarehouseModal()">Přidat nový sklad</button>
+        </div>
       </div>
 
-      <div class="warehouse-grid">
-        <div class="warehouse-box">
+      <div class="warehouse-grid" id="warehouses-page-grid">
+        <div class="warehouse-box" id="wh-card-1">
           <div class="wh-box-title">Hlavní sklad – Hradec Králové</div>
-          <div class="wh-box-code">Kód: HRADEC · Provozní sklad</div>
-          <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.5;">
+          <div class="wh-box-code">Kód: HRADEC · Provozní a expediční sklad</div>
+          <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.5;margin-bottom:0.75rem;">
             Centrální sklad s přímou návazností na expedici zákaznických objednávek e-shopu.
           </p>
+          <div class="wh-metrics">
+            <div class="metric-item">
+              <p>Fyzicky v regálech</p>
+              <strong id="wh-page-1-qty">–</strong>
+            </div>
+            <div class="metric-item">
+              <p>Rezervováno pro objednávky</p>
+              <strong id="wh-page-1-res">–</strong>
+            </div>
+          </div>
+          <div style="margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.75rem;color:var(--text-muted);">Volná disponibilní zásoba: <b id="wh-page-1-avail" style="color:var(--stock-ok);">–</b></span>
+            <button class="btn btn-primary" style="padding:0.25rem 0.65rem;font-size:0.75rem;" onclick="viewWarehouseInventory(1, 'Hlavní sklad Hradec Králové')">Zobrazit inventář</button>
+          </div>
         </div>
 
-        <div class="warehouse-box">
+        <div class="warehouse-box" id="wh-card-2">
           <div class="wh-box-title">Sezónní sklad – Třebechovice pod Orebem</div>
-          <div class="wh-box-code">Kód: TREBECHOVICE · Zásobní sklad</div>
-          <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.5;">
-            Prostor pro sezónní a větší zásoby dřevěných hraček. Převozy do Hradce Králové jsou evidovány v knize skladových pohybů.
+          <div class="wh-box-code">Kód: TREBECHOVICE · Zásobní sklad (garáž)</div>
+          <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.5;margin-bottom:0.75rem;">
+            Prostor pro sezónní a větší zásoby dřevěných hraček. Převozy do Hradce Králové jsou evidovány ve skladovém systému.
           </p>
+          <div class="wh-metrics">
+            <div class="metric-item">
+              <p>Fyzicky v regálech</p>
+              <strong id="wh-page-2-qty">–</strong>
+            </div>
+            <div class="metric-item">
+              <p>Rezervováno pro objednávky</p>
+              <strong id="wh-page-2-res">–</strong>
+            </div>
+          </div>
+          <div style="margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.75rem;color:var(--text-muted);">Volná disponibilní zásoba: <b id="wh-page-2-avail" style="color:var(--stock-ok);">–</b></span>
+            <button class="btn btn-primary" style="padding:0.25rem 0.65rem;font-size:0.75rem;" onclick="viewWarehouseInventory(2, 'Sklad Třebechovice pod Orebem')">Zobrazit inventář</button>
+          </div>
         </div>
       </div>
 
-      <div class="info-panel">
-        <strong>Plánované rozšíření:</strong> Detailní přehled skladových regálů, převodky mezi sklady a inventurní protokoly budou aktivní po dokončení Fáze 2 a Milestone 2.
+      <!-- INVENTÁŘ VYBRANÉHO SKLADU -->
+      <div class="table-container" id="warehouse-inventory-section" style="display:none;margin-top:1.5rem;">
+        <div class="table-toolbar" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="table-toolbar-title" id="inventory-warehouse-title">Inventář skladu</span>
+            <span style="font-size:0.8rem;color:var(--text-muted);margin-left:0.5rem;" id="inventory-count"></span>
+          </div>
+          <button class="btn btn-secondary" style="padding:0.25rem 0.6rem;font-size:0.75rem;" onclick="closeWarehouseInventory()">Zavřít inventář</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU kód</th>
+                <th>Název hračky</th>
+                <th>Fyzická zásoba</th>
+                <th>Rezervováno</th>
+                <th>Volně k prodeji</th>
+                <th>Minimální limit</th>
+                <th>Prodejní cena</th>
+                <th>Stav položky na skladě</th>
+              </tr>
+            </thead>
+            <tbody id="warehouse-inventory-tbody">
+              <tr><td colspan="8"><div class="empty-state"><p>Načítání inventáře…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
     <!-- STRÁNKA: OBJEDNÁVKY -->
     <section class="page" id="page-orders">
-      <div class="page-header">
-        <h2 class="page-title">Zákaznické objednávky</h2>
-        <p class="page-desc">Evidence objednávek z e-shopu, rezervace a expedice zboží</p>
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h2 class="page-title">Zákaznické objednávky</h2>
+          <p class="page-desc">Evidence objednávek z e-shopu, dvoufázová rezervace a expedice dřevěných hraček</p>
+        </div>
+        <div>
+          <button class="btn btn-primary" onclick="openCreateOrderModal()">Nová zákaznická objednávka</button>
+        </div>
       </div>
 
       <div class="info-panel">
-        <strong>Dvoufázový rezervační systém:</strong> Objednávky při vytvoření rezervují disponibilní zásobu, aby nedošlo k prodeji neexistujícího zboží. Fyzický odpis ze skladu probíhá až při expedici.
+        <strong>Dvoufázový rezervační systém (Milestone 3):</strong> Při vytvoření objednávky systém provede atomickou rezervaci zásoby (<code>reserved_quantity++</code>). Pokud disponibilní zásoba nestačí, objednávka je ihned odmítnuta, což spolehlivě zabrání prodeji neexistujícího zboží zákazníkům. Fyzický odpis probíhá až při finální expedici.
       </div>
 
       <div class="table-container">
         <div class="table-toolbar">
-          <span class="table-toolbar-title">Přehled objednávek</span>
+          <span class="table-toolbar-title">Přehled zákaznických objednávek</span>
+          <span style="font-size:0.8rem;color:var(--text-muted);" id="orders-count"></span>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Číslo objednávky</th>
-              <th>Zákazník</th>
-              <th>Datum</th>
-              <th>Položky</th>
-              <th>Celkem</th>
-              <th>Stav zpracování</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="6">
-                <div class="empty-state">
-                  <p>Žádné rozpracované objednávky. Modul objednávek bude implementován v návaznosti na skladové entity v Milestone 3.</p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Číslo objednávky</th>
+                <th>Zákazník</th>
+                <th>Datum zadání</th>
+                <th>Položky objednávky</th>
+                <th>Celková cena</th>
+                <th>Stav zpracování</th>
+                <th>Akce</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <p>Žádné evidované objednávky.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -1200,6 +1315,14 @@
           <label class="form-label" for="prod-desc">Popis a materiál</label>
           <textarea class="form-control" id="prod-desc" rows="2" placeholder="Popis hračky, bukové dřevo, certifikace…"></textarea>
           <div class="form-error" id="err-description"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kategorie produktu (lze vybrat více)</label>
+          <div id="prod-categories-container" style="display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);max-height:120px;overflow-y:auto;">
+            <span style="font-size:0.75rem;color:var(--text-muted);">Načítání kategorií…</span>
+          </div>
+          <div class="form-error" id="err-categories"></div>
         </div>
 
         <div class="form-grid-2">
@@ -1292,6 +1415,7 @@
         <div class="form-group">
           <label class="form-label" for="receive-supply-qty">Počet fyzicky doručených kusů *</label>
           <input type="number" min="1" class="form-control" id="receive-supply-qty" value="10" required />
+          <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.25rem;" id="receive-supply-max-hint"></div>
           <div class="form-error" id="err-receive-supply-qty"></div>
         </div>
 
@@ -1302,6 +1426,110 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeReceiveSupplyModal()">Zrušit</button>
         <button type="submit" class="btn btn-primary" id="btn-submit-receive-supply">Naskladnit na sklad</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Nová zákaznická objednávka (Milestone 3) -->
+<div class="modal-backdrop" id="modal-create-order">
+  <div class="modal-dialog" style="max-width:580px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Nová zákaznická objednávka</h3>
+      <button type="button" class="modal-close" onclick="closeCreateOrderModal()">&times;</button>
+    </div>
+    <form id="form-create-order" onsubmit="submitCreateOrder(event)">
+      <div class="modal-body">
+        <div class="alert-banner" id="order-create-alert"></div>
+
+        <div class="form-group">
+          <label class="form-label" for="order-customer">Zákazník e-shopu *</label>
+          <select class="form-control" id="order-customer" required>
+            <option value="">– Vyberte zákazníka –</option>
+          </select>
+          <div class="form-error" id="err-order-customer"></div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="order-product">Objednávaná dřevěná hračka *</label>
+            <select class="form-control" id="order-product" onchange="onOrderProductChanged()" required>
+              <option value="">– Vyberte hračku –</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="order-warehouse">Sklad expedice *</label>
+            <select class="form-control" id="order-warehouse" onchange="onOrderWarehouseChanged()" required>
+              <option value="0">Automaticky (ze všech skladů / rozdělit při nedostatku)</option>
+              <option value="1">Preferovat: Hlavní sklad Hradec Králové</option>
+              <option value="2">Preferovat: Sklad Třebechovice pod Orebem</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="order-qty">Objednané množství (ks) *</label>
+            <input type="number" min="1" class="form-control" id="order-qty" value="1" oninput="calculateOrderTotal()" required />
+            <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.25rem;" id="order-avail-hint"></div>
+            <div class="form-error" id="err-order-qty"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cena za kus / Celkem</label>
+            <div style="padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.88rem;">
+              <span id="order-price-unit">–</span> · <strong id="order-price-total" style="color:var(--accent);">–</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="order-note">Poznámka k objednávce (volitelně)</label>
+          <textarea class="form-control" id="order-note" rows="2" placeholder="Dárkové balení, instrukce pro dopravce…"></textarea>
+        </div>
+
+        <div style="font-size:0.78rem;color:var(--text-muted);background:#1e293b;padding:0.65rem 0.85rem;border-radius:var(--radius-sm);border:1px solid var(--border);">
+          <strong>Dvoufázový invariant:</strong> Po vytvoření objednávky systém okamžitě zarezervuje kusy na vybraném skladu. Pokud zásoba nestačí, objednávka bude odmítnuta.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeCreateOrderModal()">Zrušit</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-order">Vytvořit a zarezervovat</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Přidání nového skladu -->
+<div class="modal-backdrop" id="modal-create-warehouse">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Přidat nový sklad</h3>
+      <button type="button" class="modal-close" onclick="closeCreateWarehouseModal()">&times;</button>
+    </div>
+    <form id="form-create-warehouse" onsubmit="submitCreateWarehouse(event)">
+      <div class="modal-body">
+        <div class="alert-banner" id="warehouse-create-alert"></div>
+
+        <div class="form-group">
+          <label class="form-label" for="wh-new-code">Kód skladu (např. PARDUBICE) *</label>
+          <input type="text" class="form-control" id="wh-new-code" placeholder="PARDUBICE" required />
+          <div class="form-error" id="err-wh-code"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="wh-new-name">Název skladu *</label>
+          <input type="text" class="form-control" id="wh-new-name" placeholder="Pobočka Pardubice" required />
+          <div class="form-error" id="err-wh-name"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="wh-new-address">Adresa skladu</label>
+          <input type="text" class="form-control" id="wh-new-address" placeholder="Jiráskova 145, Pardubice" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeCreateWarehouseModal()">Zrušit</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-wh">Uložit sklad</button>
       </div>
     </form>
   </div>
@@ -1323,6 +1551,10 @@ const PAGE_TITLES = {
 };
 
 let productsCache = [];
+let categoriesCache = [];
+let customersCache = [];
+let warehousesCache = [];
+let currentInventoryWarehouseId = null;
 
 function navigate(page) {
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
@@ -1336,6 +1568,8 @@ function navigate(page) {
   document.getElementById('topbar-title').textContent = PAGE_TITLES[page] || page;
 
   if (page === 'system') loadSystemInfo();
+  if (page === 'orders') loadOrders();
+  if (page === 'warehouses') loadWarehousesSummary();
   closeSidebar();
 }
 
@@ -1376,6 +1610,123 @@ async function loadSystemInfo() {
     document.getElementById('sys-ver').textContent = '–';
     document.getElementById('sys-time').textContent = '–';
   }
+}
+
+async function loadCategories() {
+  const data = await apiFetch('/api/v1/categories');
+  if (data && Array.isArray(data)) {
+    categoriesCache = data;
+    renderCategoriesCheckboxes();
+  }
+}
+
+function renderCategoriesCheckboxes() {
+  const container = document.getElementById('prod-categories-container');
+  if (!container) return;
+  if (categoriesCache.length === 0) {
+    container.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);">Žádné kategorie nejsou evidovány.</span>';
+    return;
+  }
+  container.innerHTML = categoriesCache.map(cat => `
+    <label style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.78rem;background:#1e293b;border:1px solid var(--border-light);padding:0.25rem 0.5rem;border-radius:4px;cursor:pointer;">
+      <input type="checkbox" name="prod-cat" value="${cat.id}" style="accent-color:var(--accent);" />
+      <span>${esc(cat.name)}</span>
+    </label>
+  `).join('');
+}
+
+async function loadWarehousesSummary() {
+  const data = await apiFetch('/api/v1/warehouses/summary');
+  if (!data || !Array.isArray(data)) return;
+  warehousesCache = data;
+
+  data.forEach(wh => {
+    // Hradec Králové
+    if (wh.code === 'HRADEC' || wh.id === 1) {
+      const qEl = document.getElementById('wh-hradec-qty');
+      const rEl = document.getElementById('wh-hradec-res');
+      const aEl = document.getElementById('wh-hradec-avail');
+      if (qEl) qEl.textContent = `${wh.totalPhysicalQuantity} ks`;
+      if (rEl) rEl.textContent = `${wh.totalReservedQuantity} ks`;
+      if (aEl) aEl.textContent = `${wh.totalAvailableQuantity} ks`;
+
+      const pqEl = document.getElementById('wh-page-1-qty');
+      const prEl = document.getElementById('wh-page-1-res');
+      const paEl = document.getElementById('wh-page-1-avail');
+      if (pqEl) pqEl.textContent = `${wh.totalPhysicalQuantity} ks`;
+      if (prEl) prEl.textContent = `${wh.totalReservedQuantity} ks`;
+      if (paEl) paEl.textContent = `${wh.totalAvailableQuantity} ks`;
+    }
+    // Třebechovice
+    if (wh.code === 'TREBECHOVICE' || wh.id === 2) {
+      const qEl = document.getElementById('wh-treb-qty');
+      const rEl = document.getElementById('wh-treb-res');
+      const aEl = document.getElementById('wh-treb-avail');
+      if (qEl) qEl.textContent = `${wh.totalPhysicalQuantity} ks`;
+      if (rEl) rEl.textContent = `${wh.totalReservedQuantity} ks`;
+      if (aEl) aEl.textContent = `${wh.totalAvailableQuantity} ks`;
+
+      const pqEl = document.getElementById('wh-page-2-qty');
+      const prEl = document.getElementById('wh-page-2-res');
+      const paEl = document.getElementById('wh-page-2-avail');
+      if (pqEl) pqEl.textContent = `${wh.totalPhysicalQuantity} ks`;
+      if (prEl) prEl.textContent = `${wh.totalReservedQuantity} ks`;
+      if (paEl) paEl.textContent = `${wh.totalAvailableQuantity} ks`;
+    }
+  });
+}
+
+async function viewWarehouseInventory(warehouseId, warehouseName) {
+  navigate('warehouses');
+  currentInventoryWarehouseId = warehouseId;
+
+  const section = document.getElementById('warehouse-inventory-section');
+  const title = document.getElementById('inventory-warehouse-title');
+  const countEl = document.getElementById('inventory-count');
+  const tbody = document.getElementById('warehouse-inventory-tbody');
+
+  section.style.display = 'block';
+  title.textContent = `Inventář skladu: ${warehouseName}`;
+  tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Načítání inventáře skladu…</p></div></td></tr>`;
+
+  // Scroll k inventáři
+  section.scrollIntoView({ behavior: 'smooth' });
+
+  const data = await apiFetch(`/api/v1/warehouses/${warehouseId}/inventory`);
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    countEl.textContent = '(0 položek)';
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Na tomto skladu nejsou evidovány žádné skladové zásoby.</p></div></td></tr>`;
+    return;
+  }
+
+  countEl.textContent = `(${data.length} položek)`;
+  tbody.innerHTML = data.map(item => {
+    let badgeHtml = '<span class="badge badge-ok">V pořádku</span>';
+    if (item.availableQuantity <= 0) {
+      badgeHtml = '<span class="badge badge-critical">Vyprodáno</span>';
+    } else if (item.minStockLevel > 0 && item.availableQuantity < item.minStockLevel) {
+      badgeHtml = '<span class="badge badge-critical">Pod minimem</span>';
+    } else if (item.minStockLevel > 0 && item.availableQuantity < item.minStockLevel * 1.5) {
+      badgeHtml = '<span class="badge badge-low">Nízký stav</span>';
+    }
+
+    return `<tr>
+      <td><code>${esc(item.productSku)}</code></td>
+      <td style="font-weight:600;">${esc(item.productName)}</td>
+      <td><strong>${item.physicalQuantity} ks</strong></td>
+      <td style="color:${item.reservedQuantity > 0 ? 'var(--stock-low)' : 'var(--text-muted)'};">${item.reservedQuantity} ks</td>
+      <td style="color:var(--stock-ok);font-weight:600;">${item.availableQuantity} ks</td>
+      <td>${item.minStockLevel} ks</td>
+      <td>${item.sellingPrice != null ? item.sellingPrice.toFixed(2) + ' Kč' : '–'}</td>
+      <td>${badgeHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function closeWarehouseInventory() {
+  const section = document.getElementById('warehouse-inventory-section');
+  if (section) section.style.display = 'none';
+  currentInventoryWarehouseId = null;
 }
 
 async function loadProducts() {
@@ -1517,67 +1868,194 @@ async function loadAlerts() {
   if (!data || !Array.isArray(data) || data.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p></div></td></tr>`;
     dashTable.innerHTML = `<div class="empty-state"><p>Všechny položky jsou aktuálně nad minimální bezpečnou zásobou.</p></div>`;
+  } else {
+    tbody.innerHTML = data.map(p => {
+      const qty = p.availableQuantity ?? (p.totalQuantity ?? 0);
+      const min = p.minStockLevel ?? 0;
+      const diff = min - qty;
+      const level = getStockLevel(p);
+
+      let statusHtml = '<span class="badge badge-critical">Kritický stav</span>';
+      if (level === 'on-order') {
+        statusHtml = `<span class="badge badge-on-order">Na cestě (${p.incomingQuantity} ks)</span>`;
+      } else if (level === 'low') {
+        statusHtml = '<span class="badge badge-low">Nízký stav</span>';
+      }
+
+      let actionBtn = `<button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat</button>`;
+      if (p.incomingQuantity && p.incomingQuantity > 0) {
+        actionBtn = `<button class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="openReceiveSupplyModal(${p.id}, '${esc(p.name)}', ${p.incomingQuantity})">Naskladnit</button>`;
+      }
+
+      return `<tr>
+        <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+        <td style="font-weight:600;">${esc(p.name || '–')}</td>
+        <td>${qty} ks</td>
+        <td>${min} ks</td>
+        <td style="color:${diff > 0 ? 'var(--stock-critical)' : 'var(--stock-low)'};font-weight:600;">-${diff > 0 ? diff : 0} ks</td>
+        <td>${statusHtml}</td>
+        <td>${actionBtn}</td>
+      </tr>`;
+    }).join('');
+
+    dashTable.innerHTML = `<div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr><th>SKU</th><th>Produkt</th><th>Zásoba</th><th>Minimum</th><th>Stav</th><th>Akce</th></tr>
+        </thead>
+        <tbody>
+          ${data.slice(0, 5).map(p => {
+            const level = getStockLevel(p);
+            let st = '<span class="badge badge-critical">Kritický stav</span>';
+            if (level === 'on-order') st = `<span class="badge badge-on-order">Na cestě (${p.incomingQuantity} ks)</span>`;
+            else if (level === 'low') st = '<span class="badge badge-low">Nízký stav</span>';
+
+            let act = `<button class="btn btn-secondary" style="padding:0.2rem 0.45rem;font-size:0.72rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat</button>`;
+            if (p.incomingQuantity && p.incomingQuantity > 0) {
+              act = `<button class="btn btn-primary" style="padding:0.2rem 0.45rem;font-size:0.72rem;" onclick="openReceiveSupplyModal(${p.id}, '${esc(p.name)}', ${p.incomingQuantity})">Naskladnit</button>`;
+            }
+
+            return `<tr>
+              <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+              <td style="font-weight:600;">${esc(p.name || '–')}</td>
+              <td>${p.availableQuantity ?? (p.totalQuantity ?? 0)} ks</td>
+              <td>${p.minStockLevel ?? 0} ks</td>
+              <td>${st}</td>
+              <td>${act}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  // Načtení položek blížících se k minimu
+  await loadApproachingLowAlerts();
+}
+
+async function loadApproachingLowAlerts() {
+  const data = await apiFetch('/api/v1/products/alerts/approaching-low');
+  const tbody = document.getElementById('alerts-low-tbody');
+  const dashLowTable = document.getElementById('dash-low-table');
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Žádné položky se aktuálně neblíží k minimální zásobě.</p></div></td></tr>`;
+    if (dashLowTable) dashLowTable.innerHTML = `<div class="empty-state"><p>Žádné položky se aktuálně neblíží k minimální zásobě.</p></div>`;
     return;
   }
 
-  tbody.innerHTML = data.map(p => {
-    const qty = p.availableQuantity ?? (p.totalQuantity ?? 0);
-    const min = p.minStockLevel ?? 0;
-    const diff = min - qty;
-    const level = getStockLevel(p);
+  if (tbody) {
+    tbody.innerHTML = data.map(p => {
+      const qty = p.availableQuantity ?? (p.totalQuantity ?? 0);
+      const min = p.minStockLevel ?? 0;
+      const reserve = qty - min;
+      const statusHtml = '<span class="badge badge-low">Blíží se k minimu</span>';
+      const actionBtn = `<button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat včas</button>`;
 
-    let statusHtml = '<span class="badge badge-critical">Kritický stav</span>';
-    if (level === 'on-order') {
-      statusHtml = `<span class="badge badge-on-order">Na cestě (${p.incomingQuantity} ks)</span>`;
-    } else if (level === 'low') {
-      statusHtml = '<span class="badge badge-low">Nízký stav</span>';
-    }
+      return `<tr>
+        <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+        <td style="font-weight:600;">${esc(p.name || '–')}</td>
+        <td>${qty} ks</td>
+        <td>${min} ks</td>
+        <td style="color:var(--stock-low);font-weight:600;">+${reserve} ks</td>
+        <td>${statusHtml}</td>
+        <td>${actionBtn}</td>
+      </tr>`;
+    }).join('');
+  }
 
-    let actionBtn = `<button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat</button>`;
-    if (p.incomingQuantity && p.incomingQuantity > 0) {
-      actionBtn = `<button class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="openReceiveSupplyModal(${p.id}, '${esc(p.name)}', ${p.incomingQuantity})">Naskladnit</button>`;
+  if (dashLowTable) {
+    dashLowTable.innerHTML = `<div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr><th>SKU</th><th>Produkt</th><th>Aktuální zásoba</th><th>Minimum</th><th>Rezerva</th><th>Akce</th></tr>
+        </thead>
+        <tbody>
+          ${data.slice(0, 5).map(p => {
+            const qty = p.availableQuantity ?? (p.totalQuantity ?? 0);
+            const min = p.minStockLevel ?? 0;
+            const reserve = qty - min;
+            return `<tr>
+              <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
+              <td style="font-weight:600;">${esc(p.name || '–')}</td>
+              <td>${qty} ks</td>
+              <td>${min} ks</td>
+              <td style="color:var(--stock-low);font-weight:600;">+${reserve} ks</td>
+              <td>
+                <button class="btn btn-secondary" style="padding:0.2rem 0.45rem;font-size:0.72rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat včas</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+}
+
+async function loadOrders() {
+  const data = await apiFetch('/api/v1/orders');
+  const tbody = document.getElementById('orders-tbody');
+  const countEl = document.getElementById('orders-count');
+  if (!tbody) return;
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    if (countEl) countEl.textContent = '(0 objednávek)';
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Zatím nebyly zaevidovány žádné zákaznické objednávky.</p></div></td></tr>`;
+    return;
+  }
+
+  if (countEl) countEl.textContent = `(${data.length} objednávek)`;
+  tbody.innerHTML = data.map(o => {
+    let badgeClass = 'badge-ok';
+    if (o.status === 'CANCELLED') badgeClass = 'badge-critical';
+    else if (o.status === 'CREATED') badgeClass = 'badge-low';
+    else if (o.status === 'RESERVED') badgeClass = 'badge-on-order';
+
+    const itemsSummary = (o.items && o.items.length > 0)
+      ? o.items.map(i => `${esc(i.productName)} (${i.quantity} ks)`).join(', ')
+      : '–';
+
+    const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleDateString('cs-CZ', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '–';
+
+    let actionBtn = '–';
+    if (o.status === 'RESERVED' || o.status === 'CREATED') {
+      actionBtn = `<button class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.75rem;color:var(--stock-critical);" onclick="cancelOrder(${o.id})">Stornovat</button>`;
     }
 
     return `<tr>
-      <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
-      <td style="font-weight:600;">${esc(p.name || '–')}</td>
-      <td>${qty} ks</td>
-      <td>${min} ks</td>
-      <td style="color:${diff > 0 ? 'var(--stock-critical)' : 'var(--stock-low)'};font-weight:600;">-${diff > 0 ? diff : 0} ks</td>
-      <td>${statusHtml}</td>
+      <td><strong><code>${esc(o.orderNumber)}</code></strong></td>
+      <td>
+        <div style="font-weight:600;">${esc(o.customerName || 'Zákazník')}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">${esc(o.customerEmail || '')}</div>
+      </td>
+      <td style="font-size:0.78rem;">${dateStr}</td>
+      <td style="font-size:0.8rem;max-width:260px;">${itemsSummary}</td>
+      <td><strong style="color:var(--text-primary);">${o.totalPrice != null ? o.totalPrice.toFixed(2) + ' Kč' : '–'}</strong></td>
+      <td><span class="badge ${badgeClass}">${esc(o.statusLabel || o.status)}</span></td>
       <td>${actionBtn}</td>
     </tr>`;
   }).join('');
+}
 
-  dashTable.innerHTML = `<div style="overflow-x:auto;">
-    <table>
-      <thead>
-        <tr><th>SKU</th><th>Produkt</th><th>Zásoba</th><th>Minimum</th><th>Stav</th><th>Akce</th></tr>
-      </thead>
-      <tbody>
-        ${data.slice(0, 5).map(p => {
-          const level = getStockLevel(p);
-          let st = '<span class="badge badge-critical">Kritický stav</span>';
-          if (level === 'on-order') st = `<span class="badge badge-on-order">Na cestě (${p.incomingQuantity} ks)</span>`;
-          else if (level === 'low') st = '<span class="badge badge-low">Nízký stav</span>';
+async function cancelOrder(orderId) {
+  if (!confirm('Opravdu si přejete tuto objednávku stornovat? Rezervované zásoby budou vráceny zpět do volné disponibilní zásoby.')) {
+    return;
+  }
 
-          let act = `<button class="btn btn-secondary" style="padding:0.2rem 0.45rem;font-size:0.72rem;" onclick="openOrderSupplyModal(${p.id}, '${esc(p.name)}')">Doobjednat</button>`;
-          if (p.incomingQuantity && p.incomingQuantity > 0) {
-            act = `<button class="btn btn-primary" style="padding:0.2rem 0.45rem;font-size:0.72rem;" onclick="openReceiveSupplyModal(${p.id}, '${esc(p.name)}', ${p.incomingQuantity})">Naskladnit</button>`;
-          }
-
-          return `<tr>
-            <td><code>${esc(p.skuCode || p.sku || '–')}</code></td>
-            <td style="font-weight:600;">${esc(p.name || '–')}</td>
-            <td>${p.availableQuantity ?? (p.totalQuantity ?? 0)} ks</td>
-            <td>${p.minStockLevel ?? 0} ks</td>
-            <td>${st}</td>
-            <td>${act}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-  </div>`;
+  try {
+    const res = await fetch(`/api/v1/orders/${orderId}/cancel`, { method: 'POST' });
+    if (res.ok) {
+      await loadOrders();
+      await loadProducts();
+      await loadWarehousesSummary();
+      await loadAlerts();
+    } else {
+      const err = await res.json();
+      alert(err.message || 'Chyba při stornování objednávky.');
+    }
+  } catch (e) {
+    alert('Nepodařilo se navázat spojení se serverem.');
+  }
 }
 
 function openOrderSupplyModal(id, name) {
@@ -1634,10 +2112,22 @@ async function submitOrderSupply(event) {
   }
 }
 
+let currentIncomingMax = 0;
+
 function openReceiveSupplyModal(id, name, incomingQty) {
   document.getElementById('receive-supply-id').value = id;
   document.getElementById('receive-supply-prod-name').textContent = name;
-  document.getElementById('receive-supply-qty').value = incomingQty || 10;
+  const qtyInput = document.getElementById('receive-supply-qty');
+  const maxHint = document.getElementById('receive-supply-max-hint');
+  
+  currentIncomingMax = incomingQty || 1;
+  qtyInput.value = incomingQty || 1;
+  qtyInput.max = currentIncomingMax;
+  
+  if (maxHint) {
+    maxHint.textContent = `Objednáno u dodavatele: ${currentIncomingMax} ks. Naskladnit lze maximálně ${currentIncomingMax} ks.`;
+  }
+  
   const alertEl = document.getElementById('receive-supply-alert');
   alertEl.className = 'alert-banner';
   alertEl.textContent = '';
@@ -1662,6 +2152,13 @@ async function submitReceiveSupply(event) {
     return;
   }
 
+  // Validace proti překročení objednaného množství (oprava nahlášené chyby)
+  if (currentIncomingMax > 0 && qty > currentIncomingMax) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = `Nelze naskladnit více kusů (${qty} ks), než kolik bylo u dodavatele objednáno (${currentIncomingMax} ks).`;
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = 'Naskladňuji…';
 
@@ -1675,6 +2172,10 @@ async function submitReceiveSupply(event) {
       closeReceiveSupplyModal();
       await loadProducts();
       await loadAlerts();
+      await loadWarehousesSummary();
+      if (currentInventoryWarehouseId) {
+        await viewWarehouseInventory(currentInventoryWarehouseId, '');
+      }
     } else {
       const err = await res.json();
       alertEl.className = 'alert-banner error';
@@ -1701,18 +2202,19 @@ function refreshAll() {
   const btn = document.getElementById('btn-refresh');
   btn.textContent = 'Načítání…';
   btn.disabled = true;
-  Promise.all([loadSystemInfo(), loadProducts(), loadAlerts()])
+  Promise.all([loadSystemInfo(), loadProducts(), loadAlerts(), loadWarehousesSummary(), loadOrders(), loadCategories()])
     .finally(() => {
       btn.textContent = 'Obnovit data';
       btn.disabled = false;
     });
 }
 
-function openCreateProductModal() {
+async function openCreateProductModal() {
   document.getElementById('modal-create-product').classList.add('open');
   clearModalErrors();
   document.getElementById('form-create-product').reset();
   document.getElementById('prod-minStockLevel').value = '5';
+  await loadCategories();
   document.getElementById('prod-sku').focus();
 }
 
@@ -1740,6 +2242,11 @@ async function submitCreateProduct(event) {
   const sellingPrice = parseFloat(document.getElementById('prod-sellingPrice').value);
   const minStockLevel = parseInt(document.getElementById('prod-minStockLevel').value, 10);
 
+  // Získání vybraných kategorií
+  const checkedCategories = Array.from(document.querySelectorAll('input[name="prod-cat"]:checked'))
+    .map(cb => parseInt(cb.value, 10))
+    .filter(val => !isNaN(val));
+
   const payload = {
     sku,
     name,
@@ -1747,7 +2254,8 @@ async function submitCreateProduct(event) {
     purchasePrice: isNaN(purchasePrice) ? null : purchasePrice,
     sellingPrice: isNaN(sellingPrice) ? null : sellingPrice,
     minStockLevel: isNaN(minStockLevel) ? 0 : minStockLevel,
-    isActive: true
+    isActive: true,
+    categoryIds: checkedCategories
   };
 
   const submitBtn = document.getElementById('btn-submit-product');
@@ -1791,10 +2299,240 @@ async function submitCreateProduct(event) {
   }
 }
 
+// =========================================================================
+// SPRÁVA ZÁKAZNICKÝCH OBJEDNÁVEK (Milestone 3)
+// =========================================================================
+
+async function openCreateOrderModal() {
+  document.getElementById('modal-create-order').classList.add('open');
+  const alertEl = document.getElementById('order-create-alert');
+  alertEl.className = 'alert-banner';
+  alertEl.textContent = '';
+  document.getElementById('form-create-order').reset();
+  document.getElementById('order-qty').value = '1';
+
+  // Načtení zákazníků
+  const custSelect = document.getElementById('order-customer');
+  custSelect.innerHTML = '<option value="">Načítání zákazníků…</option>';
+  const customers = await apiFetch('/api/v1/customers');
+  if (customers && Array.isArray(customers) && customers.length > 0) {
+    customersCache = customers;
+    custSelect.innerHTML = '<option value="">– Vyberte zákazníka –</option>' +
+      customers.map(c => `<option value="${c.id}">${esc(c.fullName)} (${esc(c.email)})</option>`).join('');
+  } else {
+    custSelect.innerHTML = '<option value="">Žádní zákazníci nejsou evidováni</option>';
+  }
+
+  // Načtení produktů do selectu
+  const prodSelect = document.getElementById('order-product');
+  prodSelect.innerHTML = '<option value="">– Vyberte hračku –</option>' +
+    productsCache.map(p => `<option value="${p.id}" data-price="${p.sellingPrice || 0}">${esc(p.name)} (${esc(p.skuCode || p.sku)} · ${p.sellingPrice != null ? p.sellingPrice.toFixed(2) + ' Kč' : ''})</option>`).join('');
+
+  onOrderProductChanged();
+}
+
+function closeCreateOrderModal() {
+  document.getElementById('modal-create-order').classList.remove('open');
+}
+
+function onOrderProductChanged() {
+  const prodSelect = document.getElementById('order-product');
+  const selectedOpt = prodSelect.options[prodSelect.selectedIndex];
+  const prodId = parseInt(prodSelect.value, 10);
+  const prod = productsCache.find(p => p.id === prodId);
+
+  onOrderWarehouseChanged();
+  calculateOrderTotal();
+}
+
+function onOrderWarehouseChanged() {
+  const prodSelect = document.getElementById('order-product');
+  const whSelect = document.getElementById('order-warehouse');
+  const hintEl = document.getElementById('order-avail-hint');
+  const prodId = parseInt(prodSelect.value, 10);
+  const whId = parseInt(whSelect.value, 10);
+
+  if (!prodId || isNaN(prodId)) {
+    hintEl.textContent = '';
+    return;
+  }
+
+  const prod = productsCache.find(p => p.id === prodId);
+  if (!prod) {
+    hintEl.textContent = '';
+    return;
+  }
+
+  if (whId === 0) {
+    hintEl.textContent = `Automatické rozdělení (split fulfillment) · Celkově volné k prodeji napříč sklady: ${prod.availableQuantity ?? 0} ks`;
+    return;
+  }
+
+  // Zjištění stavu na zvoleném skladu
+  const whName = whId === 1 ? 'Hlavní sklad Hradec Králové' : 'Sklad Třebechovice pod Orebem';
+  let whQty = 0;
+  if (prod.warehouseStock) {
+    for (const [k, v] of Object.entries(prod.warehouseStock)) {
+      if ((whId === 1 && k.includes('Hradec')) || (whId === 2 && k.includes('Třebechovice'))) {
+        whQty = v;
+      }
+    }
+  }
+
+  hintEl.textContent = `Fyzicky na preferovaném skladu: ${whQty} ks · Celkově volné k prodeji: ${prod.availableQuantity ?? 0} ks (v případě potřeby se zbytek automaticky dočerpá z druhého skladu)`;
+}
+
+function calculateOrderTotal() {
+  const prodSelect = document.getElementById('order-product');
+  const selectedOpt = prodSelect.options[prodSelect.selectedIndex];
+  const priceUnit = selectedOpt ? parseFloat(selectedOpt.getAttribute('data-price') || '0') : 0;
+  const qty = parseInt(document.getElementById('order-qty').value, 10) || 0;
+
+  const unitEl = document.getElementById('order-price-unit');
+  const totalEl = document.getElementById('order-price-total');
+
+  unitEl.textContent = `${priceUnit.toFixed(2)} Kč / ks`;
+  totalEl.textContent = `Celkem: ${(priceUnit * qty).toFixed(2)} Kč`;
+}
+
+async function submitCreateOrder(event) {
+  event.preventDefault();
+  const alertEl = document.getElementById('order-create-alert');
+  alertEl.className = 'alert-banner';
+  alertEl.textContent = '';
+
+  const customerId = parseInt(document.getElementById('order-customer').value, 10);
+  const productId = parseInt(document.getElementById('order-product').value, 10);
+  const warehouseId = parseInt(document.getElementById('order-warehouse').value, 10);
+  const qty = parseInt(document.getElementById('order-qty').value, 10);
+  const note = document.getElementById('order-note').value.trim();
+
+  if (isNaN(customerId) || !customerId) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Vyberte zákazníka objednávky.';
+    return;
+  }
+  if (isNaN(productId) || !productId) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Vyberte objednávanou hračku.';
+    return;
+  }
+  if (isNaN(qty) || qty <= 0) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Objednané množství musí být alespoň 1 ks.';
+    return;
+  }
+
+  const payload = {
+    customerId,
+    note: note || null,
+    items: [
+      {
+        productId,
+        warehouseId: (warehouseId && warehouseId > 0) ? warehouseId : null,
+        quantity: qty
+      }
+    ]
+  };
+
+  const btn = document.getElementById('btn-submit-order');
+  btn.disabled = true;
+  btn.textContent = 'Ověřuji a rezervuji…';
+
+  try {
+    const res = await fetch('/api/v1/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (res.status === 201) {
+      closeCreateOrderModal();
+      await loadOrders();
+      await loadProducts();
+      await loadWarehousesSummary();
+      await loadAlerts();
+    } else {
+      alertEl.className = 'alert-banner error';
+      // Odmítnutí objednávky při nedostatku zásoby (kritický bod zadání B)
+      alertEl.textContent = data.message || 'Objednávku nelze vytvořit. Zkontrolujte dostupnou zásobu.';
+    }
+  } catch (err) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Nepodařilo se navázat spojení se serverem.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Vytvořit a zarezervovat';
+  }
+}
+
+// =========================================================================
+// SPRÁVA SKLADŮ (Vytvoření nového skladu)
+// =========================================================================
+
+function openCreateWarehouseModal() {
+  document.getElementById('modal-create-warehouse').classList.add('open');
+  const alertEl = document.getElementById('warehouse-create-alert');
+  alertEl.className = 'alert-banner';
+  alertEl.textContent = '';
+  document.getElementById('form-create-warehouse').reset();
+  document.getElementById('wh-new-code').focus();
+}
+
+function closeCreateWarehouseModal() {
+  document.getElementById('modal-create-warehouse').classList.remove('open');
+}
+
+async function submitCreateWarehouse(event) {
+  event.preventDefault();
+  const code = document.getElementById('wh-new-code').value.trim().toUpperCase();
+  const name = document.getElementById('wh-new-name').value.trim();
+  const address = document.getElementById('wh-new-address').value.trim();
+  const alertEl = document.getElementById('warehouse-create-alert');
+  const btn = document.getElementById('btn-submit-wh');
+
+  if (!code || !name) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Kód a název skladu jsou povinné údaje.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Ukládám…';
+
+  try {
+    const res = await fetch('/api/v1/warehouses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, name, address })
+    });
+    if (res.status === 201) {
+      closeCreateWarehouseModal();
+      await loadWarehousesSummary();
+      alert(`Sklad '${name}' byl úspěšně zaevidován.`);
+    } else {
+      const err = await res.json();
+      alertEl.className = 'alert-banner error';
+      alertEl.textContent = err.message || 'Chyba při vytváření skladu.';
+    }
+  } catch (e) {
+    alertEl.className = 'alert-banner error';
+    alertEl.textContent = 'Nepodařilo se navázat spojení se serverem.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Uložit sklad';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadSystemInfo();
   loadProducts();
   loadAlerts();
+  loadWarehousesSummary();
+  loadOrders();
+  loadCategories();
   setInterval(refreshAll, 60000);
 });
 </script>
