@@ -260,9 +260,9 @@ mvn test
     - Vytvořen multi-stage `Dockerfile` s buildem přes Maven a minimálním runtime Eclipse Temurin JRE 21 s neprivilegovaným uživatelem.
     - Vytvořen `docker-compose.yml` orchestrující PostgreSQL 16 kontejner s perzistentním volume a healthcheckem a backendovou aplikaci.
   - **Fáze 6 (Testování):**
-    - Vytvořeny unit testy `ProductServiceTest` (8 testovacích scénářů pokrývajících unikátnost SKU, kalkulaci marží, soft-delete i výjimky).
-    - Vytvořeny integrační testy `ProductControllerTest` (10 testů testujících REST API a HTTP stavové kódy 200, 201, 400, 404, 409, 422).
-    - Všech 19 automatizovaných testů úspěšně prochází (`BUILD SUCCESS`).
+    - Vytvořeny unit testy `ProductServiceTest` (9 testovacích scénářů pokrývajících unikátnost SKU, kalkulaci marží, soft-delete, doobjednávky a výjimky).
+    - Vytvořeny integrační testy `ProductControllerTest` (12 testů testujících REST API a HTTP stavové kódy 200, 201, 400, 404, 409, 422 včetně endpointů order-supply a receive-supply).
+    - Všech 22 automatizovaných testů úspěšně prochází (`BUILD SUCCESS`).
   - **Fáze 7 (Dokumentace & Plán):**
     - Aktualizován implementační plán `IMPLEMENTATION_PLAN.md` (odškrtnuty všechny body Milestone 1).
     - Zaznamenán postup a návody do `README.md`.
