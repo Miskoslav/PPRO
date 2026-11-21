@@ -178,6 +178,24 @@ Systém je postaven na moderním, robustním a typovém stacku splňujícím ve�
 
 ---
 
+## 🤖 6. Přiznání práce s AI a metodika vývoje (Dle zadání PPRO)
+
+V souladu se zadáním předmětu PPRO (oddíl 1 a oddíl 5, bod 9 směrnice projektu) je v projektu transparentně deklarováno využití agentních AI nástrojů:
+
+- **Použitý AI nástroj:** Google Antigravity (asistent v roli technického konzultanta a pair-programméra).
+- **Oblasti využití v projektu:**
+  - Návrh a generování kostry DDL skriptů pro verzované migrace Flyway (`V1` až `V6`) a syntetických seed dat.
+  - Asistence při implementaci doménových JPA entit, DTO struktur a REST kontrolerů.
+  - Tvorba šablony testovacích scénářů (JUnit 5 + MockMvc) pro unit a integrační testy.
+  - Asistence s klientským CSS a layoutem SPA rozhraní (`index.html`) s důrazem na dodržení seriózního firemního vzhledu bez generických AI klišé.
+- **Způsob ověření vygenerovaného kódu:**
+  - **Automatizované testy:** Veškerá aplikační logika (výpočet disponibilní zásoby, split fulfillment, fixace cen, validace naskladnění) je verifikována sadou 28 automatizovaných testů (`mvn test`).
+  - **Kontejnerový běh:** Ověření funkčnosti celé vertikály (databáze + backend + webové UI) příkazem `docker compose up --build`.
+  - **Ruční verifikace v prohlížeči:** Každý uživatelský scénář (vytvoření objednávky, zobrazení inventáře, naskladnění zboží) byl interaktivně prověřen studentem.
+  - **Kódová kontrola:** Veškerý kód je podrobně okomentován (Javadoc a vysvětlující komentáře), student plně rozumí každé třídě a je schopen ji na místě upravit a obhájit.
+
+---
+
 ## ⚙️ 6. Návod na zprovoznění a spuštění
 
 ### Prerekvizity:
@@ -293,5 +311,15 @@ mvn test
     - **Split fulfillment (Objednávka ze dvou skladů):** Implementováno automatické rozdělení odběru a rezervací mezi sklady (např. 10 ks z Hradce a 4 ks z Třebechovic), pokud celková zásoba postačuje, ale žádný samostatný sklad nemá všechny kusy. V databázi i ve skladových zásobách se změna přesně zaznamená do příslušných skladů.
     - **Předělání Dockeru:** Modernizován multi-stage `Dockerfile` (efektivní cachování Maven vrstev přes `dependency:resolve`, přidán `curl` pro kontejnerový healthcheck) a `docker-compose.yml` (přidán healthcheck pro backend i PostgreSQL, izolovaná bridge síť `drevenka-network`, optimalizace paměti JVM pro kontejnery).
     - **Testovací pokrytí:** Sada rozšířena na **28 automatizovaných testů** (včetně testů pro split fulfillment a storno). Všechny testy prochází na 100 % (`BUILD SUCCESS`).
+
+- **2026-11-21:**
+  - **Kompletní zpracování oficiální projektové dokumentace (`PPRO dokumentace.docx`):**
+    - **1. Popis řešení:** Detailně sepsán rozbor problému klienta (odstranění chyb z Excelu, souběhu zápisů a prodeje do mínusu), představení společnosti Dřevěnka s.r.o. a obou skladů (Hradec Králové a Třebechovice pod Orebem), dvoufázový model rezervací a expedice, auditní neměnnost pohybů, split fulfillment a kontejnerizace Docker Compose. Rozepsána třívrstvá architektura: Frontend SPA (HTML5/CSS/Vanilla JS), Backend (Java 21, Spring Boot 3.3, REST API, Services, DTOs, `@Transactional`, optimistické zamykání) a Databáze (PostgreSQL 16, Spring Data JPA/Hibernate, 7 entit s vazbou M:N, verzované Flyway migrace V1–V6).
+    - **2. Rozhodnutí:** Vyplněna kompletní tabulka architektonických rozhodnutí R1 až R11 (technologický stack, třívrstvá architektura, Flyway, SPA bez Node.js buildu, dvoufázový model, neměnné pohyby, fixace cen, zboží na cestě, split fulfillment a odstranění AI prvků z UI).
+    - **3. Změny požadované klientem:** Zaneseny autentické požadavky ze cvičení (Z1: Odstranění AI prvků a Swaggeru z klientského menu; Z2: Úprava formuláře objednávky – přesun volby skladu pod hračku na celou šířku). Obě změny jsou ve stavu „Hotovo“.
+    - **Aktualizace metadat:** Datum poslední úpravy nastaveno na 21. 11. 2026.
+  - **Ergonomická úprava formuláře objednávky (Změna Z2):**
+    - V šabloně modálního dialogu objednávky (`modal-create-order` v `index.html`) byl dropdown volby skladu expedice (`order-warehouse`) přesunut z dvousloupcového layoutu na samostatný řádek přímo pod výběr hračky na celou šířku dialogu.
+    - Tím byl vyřešen požadavek klienta: volba skladu již není nevkusně namačkaná vpravo a skladník nemusí horizontálně scrollovat.
 
 

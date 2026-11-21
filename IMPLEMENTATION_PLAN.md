@@ -202,6 +202,16 @@ V této fázi byl realizován klíčový invariant zadání B: zamezení prodeje
   - Zavedena dedikovaná síť `drevenka-network` (bridge).
   - Parametry JVM optimalizované pro kontejner (`MaxRAMPercentage=75.0`).
 
+### Fáze 18: Oficiální projektová dokumentace a ergonomie UI
+- [x] **18.1** Vyplnění oficiálního dokumentu `PPRO dokumentace.docx`:
+  - Vypracován oddíl *1. Popis řešení* (kontext firmy, řešení původních problémů, třívrstvá architektura, REST API, JPA, migrace a Docker).
+  - Vyplněna tabulka *2. Rozhodnutí* se všemi 11 architektonickými rozhodnutími (R1 až R11).
+  - Vyplněna tabulka *3. Změny požadované klientem* s autentickými požadavky klienta ze cvičení (Z1 a Z2 ve stavu Hotovo).
+  - Aktualizována hlavička metadat (datum poslední úpravy: 21. 11. 2026).
+- [x] **18.2** Klientská úprava formuláře objednávky (Změna Z2):
+  - Přesun dropdownu volby skladu expedice (`order-warehouse`) v `index.html` z 2-sloupcového gridu na celou šířku formuláře pod výběr dřevěné hračky.
+  - Eliminace nutnosti horizontálního posunu a zajištění čisté ergonomie.
+
 ---
 
 ## 🔮 Výhled na další milestony (Rozšíření systému)
