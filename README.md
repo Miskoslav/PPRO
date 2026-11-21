@@ -159,6 +159,7 @@ erDiagram
 | **Automatizované testy** | ✅ Hotovo | **28 automatizovaných testů** (unit testy byznys pravidel, doobjednávek, rezervací, split fulfillmentu, odmítnutí prodeje neexistujícího zboží, integrační testy REST API a kontextu) |
 | **Spuštění příkazem `docker compose up`** | ✅ Hotovo | Multi-stage `Dockerfile` (s cache závislostí a healthcheckem) a `docker-compose.yml` s izolovanou bridge sítí a perzistentním volume |
 | **Technická dokumentace v README.md** | ✅ Hotovo | Detailní zadání, pravidla, rozhodnutí k otevřeným bodům, technický deník (SSOT) |
+| **Finální technická dokumentace v PDF** | ✅ Hotovo | Uloženo ve složce [`docs/technicka-dokumentace.pdf`](file:///c:/Dokumenty/Škola/Vysoká/PPRO/PPRO/docs/technicka-dokumentace.pdf) (14 stran, všech 9 povinných kapitol dle oddílu 5) |
 | **Syntetická data (žádné osobní/citlivé údaje)** | ✅ Zajištěno | Výhradně fiktivní sortiment dřevěných hraček a fiktivní zákazníci Dřevěnky s.r.o. |
 
 ---
@@ -182,17 +183,15 @@ Systém je postaven na moderním, robustním a typovém stacku splňujícím ve�
 
 V souladu se zadáním předmětu PPRO (oddíl 1 a oddíl 5, bod 9 směrnice projektu) je v projektu transparentně deklarováno využití agentních AI nástrojů:
 
-- **Použitý AI nástroj:** Google Antigravity (asistent v roli technického konzultanta a pair-programméra).
-- **Oblasti využití v projektu:**
-  - Návrh a generování kostry DDL skriptů pro verzované migrace Flyway (`V1` až `V6`) a syntetických seed dat.
-  - Asistence při implementaci doménových JPA entit, DTO struktur a REST kontrolerů.
-  - Tvorba šablony testovacích scénářů (JUnit 5 + MockMvc) pro unit a integrační testy.
-  - Asistence s klientským CSS a layoutem SPA rozhraní (`index.html`) s důrazem na dodržení seriózního firemního vzhledu bez generických AI klišé.
-- **Způsob ověření vygenerovaného kódu:**
-  - **Automatizované testy:** Veškerá aplikační logika (výpočet disponibilní zásoby, split fulfillment, fixace cen, validace naskladnění) je verifikována sadou 28 automatizovaných testů (`mvn test`).
+- **Použitý AI nástroj:** Google Antigravity (programovací agent řízený prompty studenta).
+- **Rozdělení rolí a metodika práce:**
+  - **Role studenta (Zadávání, testování a revize):** Student vystupoval v roli zadavatele, architekta a testera. Zadával požadavky klienta ze cvičení, promptoval agenta, prováděl manuální testování funkčnosti aplikace v prohlížeči a revizi vygenerovaného kódu. Zjištěné chyby (např. chybějící validace meze naskladnění, neergonomické formuláře) student specifikoval a promptováním navedl agenta k nápravě.
+  - **Role agenta (Generování kódu):** Agent na základě promptů generoval SQL DDL migrace, doménové entity, DTO přepravky, servisní třídy, REST kontrolery, testy v JUnit 5 a klientské HTML/CSS rozhraní.
+- **Způsob ověření vygenerovaného kódu studentem:**
+  - **Manuální funkční testování v prohlížeči:** Každý uživatelský scénář byl studentem interaktivně prověřen v aplikaci.
+  - **Automatizované testy:** Aplikační logika a byznys pravidla jsou ověřena sadou 28 automatizovaných testů (`mvn test`).
   - **Kontejnerový běh:** Ověření funkčnosti celé vertikály (databáze + backend + webové UI) příkazem `docker compose up --build`.
-  - **Ruční verifikace v prohlížeči:** Každý uživatelský scénář (vytvoření objednávky, zobrazení inventáře, naskladnění zboží) byl interaktivně prověřen studentem.
-  - **Kódová kontrola:** Veškerý kód je podrobně okomentován (Javadoc a vysvětlující komentáře), student plně rozumí každé třídě a je schopen ji na místě upravit a obhájit.
+  - **Kódová revize:** Kód je přehledně okomentován (Javadoc) a student je schopen každou část aplikace u obhajoby vysvětlit a provést zadanou drobnou úpravu.
 
 ---
 
@@ -321,5 +320,8 @@ mvn test
   - **Ergonomická úprava formuláře objednávky (Změna Z2):**
     - V šabloně modálního dialogu objednávky (`modal-create-order` v `index.html`) byl dropdown volby skladu expedice (`order-warehouse`) přesunut z dvousloupcového layoutu na samostatný řádek přímo pod výběr hračky na celou šířku dialogu.
     - Tím byl vyřešen požadavek klienta: volba skladu již není nevkusně namačkaná vpravo a skladník nemusí horizontálně scrollovat.
+  - **Vygenerování finální technické dokumentace (`docs/technicka-dokumentace.pdf`):**
+    - Vytvořena složka `docs/` a vygenerována oficiální finální technická dokumentace projektu v PDF (rozsah 14 stran, přesně v rozmezí 8–15 stran dle oddílu 5 směrnice).
+    - Obsahuje všech 9 povinných kapitol: Titulní stranu, Úvod, Datový model s vektorovým ER diagramem a popisem 7 entit (včetně M:N vazby), Třívrstvou architekturu, Použité technologie, Postup spuštění krok za krokem, Testy (28 testů), **Protokol o zacyklení agenta (1 celá strana o chybě naskladnění nad meze)** a Přiznání práce s AI.
 
 

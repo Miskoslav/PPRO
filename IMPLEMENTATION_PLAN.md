@@ -211,6 +211,9 @@ V této fázi byl realizován klíčový invariant zadání B: zamezení prodeje
 - [x] **18.2** Klientská úprava formuláře objednávky (Změna Z2):
   - Přesun dropdownu volby skladu expedice (`order-warehouse`) v `index.html` z 2-sloupcového gridu na celou šířku formuláře pod výběr dřevěné hračky.
   - Eliminace nutnosti horizontálního posunu a zajištění čisté ergonomie.
+- [x] **18.3** Finální technická dokumentace v PDF (`docs/technicka-dokumentace.pdf`):
+  - Vygenerován oficiální dokument ve složce `docs/` v rozsahu 14 stran (doporučeno 8–15 stran dle oddílu 5 směrnice).
+  - Obsahuje všech 9 povinných kapitol včetně vektorového ER diagramu (7 entit a M:N vazba), návodu na spuštění, přehledu 28 testů, **Protokolu o zacyklení na 1 stranu** (chyba naskladnění nad meze) a Přiznání práce s AI.
 
 ---
 

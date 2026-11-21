@@ -1,0 +1,880 @@
+﻿<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Technická dokumentace – Dřevěnka s.r.o. (PPRO)</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 20mm 18mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1f2937;
+    line-height: 1.55;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Page break helpers */
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* Title Page */
+  .title-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30mm 0 20mm 0;
+  }
+
+  .title-header {
+    text-align: center;
+    border-bottom: 2px solid #1e3a8a;
+    padding-bottom: 25px;
+  }
+
+  .title-header h3 {
+    margin: 0 0 8px 0;
+    color: #4b5563;
+    font-size: 13pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .title-header h4 {
+    margin: 0;
+    color: #6b7280;
+    font-size: 11pt;
+    font-weight: 500;
+  }
+
+  .title-main {
+    text-align: center;
+    margin: 50px 0;
+  }
+
+  .title-main .doc-type {
+    font-size: 13pt;
+    color: #2563eb;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .title-main h1 {
+    font-size: 26pt;
+    color: #0f172a;
+    margin: 0 0 16px 0;
+    line-height: 1.25;
+    font-weight: 800;
+  }
+
+  .title-main .subtitle {
+    font-size: 15pt;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .title-meta-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 22px 30px;
+    margin-top: 40px;
+  }
+
+  .title-meta-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .title-meta-table td {
+    padding: 6px 0;
+    font-size: 10.5pt;
+  }
+
+  .title-meta-table td.label {
+    font-weight: 600;
+    color: #475569;
+    width: 35%;
+  }
+
+  .title-meta-table td.val {
+    color: #0f172a;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4 {
+    color: #0f172a;
+    font-weight: 700;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  h1 {
+    font-size: 18pt;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 6px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #1e3a8a;
+  }
+
+  h2 {
+    font-size: 13.5pt;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #1e293b;
+    border-left: 4px solid #2563eb;
+    padding-left: 10px;
+  }
+
+  h3 {
+    font-size: 11pt;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    color: #334155;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: justify;
+  }
+
+  ul, ol {
+    margin-top: 0;
+    margin-bottom: 12px;
+    padding-left: 22px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  /* Tables */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 18px 0;
+    font-size: 9pt;
+  }
+
+  table.data-table th, table.data-table td {
+    border: 1px solid #cbd5e1;
+    padding: 7px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  table.data-table th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  table.data-table tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  /* Callout boxes */
+  .callout {
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin: 14px 0;
+  }
+
+  .callout.warning {
+    border-left-color: #eab308;
+    background: #fefce8;
+  }
+
+  .callout.success {
+    border-left-color: #22c55e;
+    background: #f0fdf4;
+  }
+
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #0f172a;
+    font-size: 9.5pt;
+  }
+
+  /* Code blocks */
+  pre, code {
+    font-family: "Consolas", "Courier New", monospace;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 8.5pt;
+    line-height: 1.45;
+    overflow-x: auto;
+    margin: 12px 0 16px 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  p code, li code {
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 9pt;
+    border: 1px solid #e2e8f0;
+  }
+
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dotted #cbd5e1;
+    font-size: 10pt;
+  }
+
+  .toc-item .dots {
+    flex-grow: 1;
+    border-bottom: 1px dotted #94a3b8;
+    margin: 0 8px 4px 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- STRANA 1: TITULNÍ STRANA -->
+<div class="title-page page-break">
+  <div class="title-header">
+    <h3>Univerzita Hradec Králové</h3>
+    <h4>Fakulta informatiky a managementu · Katedra informatiky a kvantitativních metod</h4>
+  </div>
+
+  <div class="title-main">
+    <div class="doc-type">Technická dokumentace semestrálního projektu</div>
+    <h1>Skladový systém pro e-shop<br>Dřevěnka s.r.o.</h1>
+    <div class="subtitle">Zadání B: Sklad pro malý e-shop</div>
+  </div>
+
+  <div class="title-meta-box">
+    <table class="title-meta-table">
+      <tr>
+        <td class="label">Předmět:</td>
+        <td class="val">Pokročilé programování (PPRO)</td>
+      </tr>
+      <tr>
+        <td class="label">Autor / Student:</td>
+        <td class="val"><strong>Michal Duffek</strong></td>
+      </tr>
+      <tr>
+        <td class="label">Studijní program:</td>
+        <td class="val">Aplikovaná informatika / Informační management</td>
+      </tr>
+      <tr>
+        <td class="label">Akademický rok:</td>
+        <td class="val">2026/2027 (Zimní semestr)</td>
+      </tr>
+      <tr>
+        <td class="label">Vyučující (Klient):</td>
+        <td class="val">Ing. Dominik Palla</td>
+      </tr>
+      <tr>
+        <td class="label">Repozitář GitHub:</td>
+        <td class="val"><a href="https://github.com/Miskoslav/PPRO" style="color:#2563eb;text-decoration:none;">https://github.com/Miskoslav/PPRO</a></td>
+      </tr>
+      <tr>
+        <td class="label">Datum odevzdání:</td>
+        <td class="val">21. listopadu 2026</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- STRANA 2: OBSAH A ÚVOD -->
+<div class="page-break">
+  <h1>Obsah dokumentu</h1>
+  <div style="margin-bottom: 25px;">
+    <div class="toc-item"><span><strong>1. Úvod a analýza problému klienta</strong></span><span class="dots"></span><span>2</span></div>
+    <div class="toc-item"><span><strong>2. Datový model a návrh databáze</strong></span><span class="dots"></span><span>3</span></div>
+    <div class="toc-item"><span>&nbsp;&nbsp;&nbsp;&nbsp;2.1 ER diagram a struktura entit</span><span class="dots"></span><span>3</span></div>
+    <div class="toc-item"><span>&nbsp;&nbsp;&nbsp;&nbsp;2.2 Popis klíčových entit a integritních omezení</span><span class="dots"></span><span>4</span></div>
+    <div class="toc-item"><span><strong>3. Třívrstvá architektura systému</strong></span><span class="dots"></span><span>5</span></div>
+    <div class="toc-item"><span>&nbsp;&nbsp;&nbsp;&nbsp;3.1 Izolace vrstev a jednosměrné závislosti</span><span class="dots"></span><span>5</span></div>
+    <div class="toc-item"><span>&nbsp;&nbsp;&nbsp;&nbsp;3.2 Realizace doménové logiky a transakcí</span><span class="dots"></span><span>6</span></div>
+    <div class="toc-item"><span><strong>4. Použité technologie a zdůvodnění volby</strong></span><span class="dots"></span><span>6</span></div>
+    <div class="toc-item"><span><strong>5. Postup nasazení a spuštění krok za krokem</strong></span><span class="dots"></span><span>7</span></div>
+    <div class="toc-item"><span><strong>6. Automatizované testy a verifikace funkčnosti</strong></span><span class="dots"></span><span>8</span></div>
+    <div class="toc-item"><span><strong>7. Protokol o zacyklení agenta (Povinná reflexe)</strong></span><span class="dots"></span><span>9</span></div>
+    <div class="toc-item"><span><strong>8. Přiznání práce s AI a metodika vývoje</strong></span><span class="dots"></span><span>10</span></div>
+  </div>
+
+  <h1>1. Úvod a analýza problému klienta</h1>
+  
+  <h2>1.1 Kontext a profil klienta</h2>
+  <p>
+    Společnost <strong>Dřevěnka s.r.o.</strong> (zastoupená panem Petrem Doležalem) se již deset let věnuje zakázkové výrobě a internetovému prodeji tradičních dřevěných hraček (stavebnice z masivního buku, vláčkodráhy, tahací zvířátka, montessori pomůcky a panenkové domečky). V posledních třech letech zaznamenal e-shop dynamický růst tržeb a počtu objednávek, čímž narazil na technologický strop svého dosavadního provozního modelu.
+  </p>
+
+  <h2>1.2 Původní stav a jeho kritické nedostatky</h2>
+  <p>
+    Skladové zásoby (cca 400 unikátních položek) byly dosud evidovány v jediném sdíleném sešitu <em>Microsoft Excel</em>, který měli zároveň otevřený tři pracovníci na různých počítačích. Zásoby jsou fyzicky rozděleny na dvě geografické lokace:
+  </p>
+  <ul>
+    <li><strong>Hlavní sklad v Hradci Králové:</strong> Expediční centrum pro balení zásilek zákazníkům s nejvíce obrátkovým zbožím.</li>
+    <li><strong>Detašovaný sklad v Třebechovicích pod Orebem:</strong> Původní truhlářská dílna a skladovací hala pro objemnější a sezónní sortiment.</li>
+  </ul>
+  <p>
+    Tento provizorní stav vedl k provozním chybám:
+  </p>
+  <ol>
+    <li><strong>Chyby v souběhu (Race Conditions):</strong> Při paralelním zápisu v Excelu docházelo k přemazání dat o vydaných kusech bez jakékoliv auditní stopy.</li>
+    <li><strong>Prodej neexistujícího zboží (Overselling do záporu):</strong> E-shop přijal objednávku na zboží, které již bylo fyzicky vyprodáno. Majitel musel zákazníkům osobně telefonovat a omlouvat se, což poškozovalo reputaci firmy.</li>
+    <li><strong>Chybějící vazba na objednávky:</strong> Nebylo jasné, které kusy na skladě jsou volné k prodeji a které jsou již slíbeny čekajícím zákazníkům.</li>
+    <li><strong>Nulová dohledatelnost interních přesunů:</strong> Zboží převážené z Třebechovic do Hradce se nikde nezaznamenávalo a pravidelně se ztrácelo z dohledu.</li>
+  </ol>
+
+  <h2>1.3 Cíl projektu a řešení</h2>
+  <p>
+    Cílem projektu bylo vytvořit robustní, třívrstvý skladový a evidenční systém, který plně digitalizuje materiálové toky Dřevěnky s.r.o., zavádí <strong>dvoufázový model řízení zásob</strong> (okamžitá rezervace při objednání $\rightarrow$ fyzický odpis při expedici), garantuje nemožnost prodeje do záporu a umožňuje tzv. <strong>split fulfillment</strong> (automatické rozdělení odběru ze dvou skladů při nedostatku na jednom z nich).
+  </p>
+</div>
+
+<!-- STRANA 3: DATOVÝ MODEL (ER DIAGRAM A ENTITY) -->
+<div class="page-break">
+  <h1>2. Datový model a návrh databáze</h1>
+
+  <h2>2.1 Entitně-relační diagram (ERD)</h2>
+  <p>
+    Datový model splňuje veškeré požadavky povinného minima předmětu PPRO: obsahuje <strong>7 plnohodnotných relačních entit</strong>, přísná integritní omezení a explicitně realizovanou vazbu <strong>M:N</strong> mezi produkty a kategoriemi přes spojovací tabulku <code>product_categories</code>.
+  </p>
+
+  <div style="text-align: center; margin: 15px 0; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px;">
+    <!-- Vektorový SVG diagram ERD -->
+    <svg width="600" height="340" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%;">
+      <defs>
+        <linearGradient id="boxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#f1f5f9"/>
+        </linearGradient>
+      </defs>
+
+      <!-- ENTITY: CATEGORY -->
+      <g transform="translate(20, 20)">
+        <rect width="130" height="90" rx="5" fill="url(#boxGrad)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M 0 25 L 130 25" stroke="#1e3a8a" stroke-width="1"/>
+        <text x="65" y="17" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">CATEGORY</text>
+        <text x="10" y="40" font-size="8.5" fill="#334155">PK id (BIGINT)</text>
+        <text x="10" y="55" font-size="8.5" fill="#334155">code (VARCHAR)</text>
+        <text x="10" y="70" font-size="8.5" fill="#334155">name (VARCHAR)</text>
+        <text x="10" y="85" font-size="8.5" fill="#334155">is_active (BOOL)</text>
+      </g>
+
+      <!-- M:N SPOJKA -->
+      <g transform="translate(180, 40)">
+        <rect width="110" height="50" rx="5" fill="#e0e7ff" stroke="#3730a3" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <text x="55" y="18" font-size="8.5" font-weight="bold" text-anchor="middle" fill="#3730a3">product_categories</text>
+        <text x="10" y="32" font-size="8" fill="#1e1b4b">FK product_id</text>
+        <text x="10" y="44" font-size="8" fill="#1e1b4b">FK category_id</text>
+      </g>
+
+      <!-- ENTITY: PRODUCT -->
+      <g transform="translate(320, 20)">
+        <rect width="130" height="110" rx="5" fill="url(#boxGrad)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M 0 25 L 130 25" stroke="#1e3a8a" stroke-width="1"/>
+        <text x="65" y="17" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">PRODUCT</text>
+        <text x="10" y="40" font-size="8.5" fill="#334155">PK id (BIGINT)</text>
+        <text x="10" y="55" font-size="8.5" fill="#334155">sku (VARCHAR, UQ)</text>
+        <text x="10" y="70" font-size="8.5" fill="#334155">selling_price (NUM)</text>
+        <text x="10" y="85" font-size="8.5" fill="#334155">min_stock_level (INT)</text>
+        <text x="10" y="100" font-size="8.5" fill="#334155">incoming_qty (INT)</text>
+      </g>
+
+      <!-- ENTITY: STOCK_ITEM -->
+      <g transform="translate(320, 160)">
+        <rect width="130" height="85" rx="5" fill="url(#boxGrad)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M 0 25 L 130 25" stroke="#1e3a8a" stroke-width="1"/>
+        <text x="65" y="17" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">STOCK_ITEM</text>
+        <text x="10" y="40" font-size="8.5" fill="#334155">PK id (BIGINT)</text>
+        <text x="10" y="55" font-size="8.5" fill="#334155">FK warehouse_id</text>
+        <text x="10" y="70" font-size="8.5" fill="#334155">FK product_id</text>
+        <text x="10" y="85" font-size="8.5" fill="#334155">qty, reserved_qty</text>
+      </g>
+
+      <!-- ENTITY: WAREHOUSE -->
+      <g transform="translate(180, 160)">
+        <rect width="110" height="85" rx="5" fill="url(#boxGrad)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M 0 25 L 110 25" stroke="#1e3a8a" stroke-width="1"/>
+        <text x="55" y="17" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">WAREHOUSE</text>
+        <text x="10" y="40" font-size="8.5" fill="#334155">PK id (BIGINT)</text>
+        <text x="10" y="55" font-size="8.5" fill="#334155">code (HK, TR)</text>
+        <text x="10" y="70" font-size="8.5" fill="#334155">name (VARCHAR)</text>
+        <text x="10" y="85" font-size="8.5" fill="#334155">city, is_active</text>
+      </g>
+
+      <!-- ENTITY: CUSTOMER -->
+      <g transform="translate(20, 210)">
+        <rect width="130" height="85" rx="5" fill="url(#boxGrad)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M 0 25 L 130 25" stroke="#1e3a8a" stroke-width="1"/>
+        <text x="65" y="17" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">CUSTOMER</text>
+        <text x="10" y="40" font-size="8.5" fill="#334155">PK id (BIGINT)</text>
+        <text x="10" y="55" font-size="8.5" fill="#334155">first_name, last_name</text>
+        <text x="10" y="70" font-size="8.5" fill="#334155">email (UQ)</text>
+        <text x="10" y="85" font-size="8.5" fill="#334155">city, street, phone</text>
+      </g>
+
+      <!-- ENTITY: ORDER -->
+      <g transform="translate(20, 120)">
+        <rect width="130" height="80" rx="5" fill="url(#boxGrad)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M 0 25 L 130 25" stroke="#1e3a8a" stroke-width="1"/>
+        <text x="65" y="17" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">ORDER</text>
+        <text x="10" y="40" font-size="8.5" fill="#334155">PK id (BIGINT)</text>
+        <text x="10" y="55" font-size="8.5" fill="#334155">order_number (UQ)</text>
+        <text x="10" y="70" font-size="8.5" fill="#334155">status (ENUM)</text>
+      </g>
+
+      <!-- ENTITY: ORDER_ITEM -->
+      <g transform="translate(470, 90)">
+        <rect width="120" height="90" rx="5" fill="url(#boxGrad)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M 0 25 L 120 25" stroke="#1e3a8a" stroke-width="1"/>
+        <text x="60" y="17" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">ORDER_ITEM</text>
+        <text x="10" y="40" font-size="8.5" fill="#334155">PK id (BIGINT)</text>
+        <text x="10" y="55" font-size="8.5" fill="#334155">FK order_id</text>
+        <text x="10" y="70" font-size="8.5" fill="#334155">FK product_id</text>
+        <text x="10" y="85" font-size="8.5" fill="#334155">unit_price_at_buy</text>
+      </g>
+
+      <!-- LINES & CONNECTIONS -->
+      <line x1="150" y1="65" x2="180" y2="65" stroke="#2563eb" stroke-width="2"/>
+      <line x1="290" y1="65" x2="320" y2="65" stroke="#2563eb" stroke-width="2"/>
+      <line x1="385" y1="130" x2="385" y2="160" stroke="#2563eb" stroke-width="2"/>
+      <line x1="290" y1="202" x2="320" y2="202" stroke="#2563eb" stroke-width="2"/>
+      <line x1="85" y1="210" x2="85" y2="200" stroke="#2563eb" stroke-width="2"/>
+      <line x1="450" y1="100" x2="470" y2="100" stroke="#2563eb" stroke-width="2"/>
+    </svg>
+    <div style="font-size: 8pt; color: #64748b; margin-top: 5px;">Obrázek 1: Relační datový model aplikace s vyznačením M:N vazby (product_categories).</div>
+  </div>
+
+  <h2>2.2 Správa schématu a verzované migrace (Flyway)</h2>
+  <p>
+    V databázi nebyly žádné tabulky vytvářeny ručně. Schéma je řízeno striktně přes verzované SQL skripty nástroje <strong>Flyway</strong>, které se spouštějí automaticky při startu Spring Bootu:
+  </p>
+  <ul>
+    <li><code>V1__create_products_table.sql</code>: DDL tabulky hraček <code>products</code>.</li>
+    <li><code>V2__seed_demo_products.sql</code>: Inicializační data sortimentu (Káča, Kostky, Vláček, Pejsek Bobík, Domeček).</li>
+    <li><code>V3__create_warehouses_categories_and_stock.sql</code>: Sklady, kategorie, M:N spojka a zásoby <code>stock_items</code>.</li>
+    <li><code>V4__seed_warehouses_categories_and_stock.sql</code>: Reálné počty kusů po skladech Hradec a Třebechovice.</li>
+    <li><code>V5__create_customers_orders.sql</code>: Zákazníci, objednávky a položky objednávek se zafixovanou cenou.</li>
+    <li><code>V6__seed_customers_and_orders.sql</code>: Syntetičtí zákazníci a ukázkové objednávky v různých fázích zpracování.</li>
+  </ul>
+</div>
+
+<!-- STRANA 4: POPIS ENTIT A INTEGRITNÍCH PRAVIDEL -->
+<div class="page-break">
+  <h2>2.3 Detailní popis relačních entit</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width: 18%;">Entita</th>
+        <th style="width: 27%;">Tabulka & Klíče</th>
+        <th>Význam a byznys logika entity</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Product</strong></td>
+        <td><code>products</code><br>PK: <code>id</code><br>UQ: <code>sku</code></td>
+        <td>Katalogová karta dřevěné hračky. Nese nákupní a prodejní cenu, bezpečné minimum (<code>min_stock_level</code>) a evidenci objednaného zboží u dodavatele na cestě (<code>incoming_quantity</code>).</td>
+      </tr>
+      <tr>
+        <td><strong>Category</strong></td>
+        <td><code>categories</code><br>PK: <code>id</code><br>UQ: <code>code</code></td>
+        <td>Kategorie hraček (např. Dřevěné stavebnice, Montessori, Vláčky). Vazba na <code>Product</code> je typu <strong>M:N</strong> realizovaná přes <code>product_categories</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Warehouse</strong></td>
+        <td><code>warehouses</code><br>PK: <code>id</code><br>UQ: <code>code</code></td>
+        <td>Fyzická skladovací lokace (Sklad Hradec Králové vs. Sklad Třebechovice pod Orebem). Umožňuje evidovat adresu a stav aktivity.</td>
+      </tr>
+      <tr>
+        <td><strong>StockItem</strong></td>
+        <td><code>stock_items</code><br>PK: <code>id</code><br>FK: <code>warehouse_id</code>, <code>product_id</code></td>
+        <td>Stav konkrétní hračky na konkrétním skladu. Klíčový prvek dvoufázového modelu: rozlišuje <code>quantity</code> (fyzický stav na regálu) a <code>reserved_quantity</code> (blokováno objednávkami). Volná zásoba se počítá jako: $Disponibilni = quantity - reserved\_quantity$.</td>
+      </tr>
+      <tr>
+        <td><strong>Customer</strong></td>
+        <td><code>customers</code><br>PK: <code>id</code><br>UQ: <code>email</code></td>
+        <td>Zákazník e-shopu. <em>Obchodní pravidlo klienta:</em> Zákazníci se z databáze nikdy nemažou kvůli garancím záruk a reklamací.</td>
+      </tr>
+      <tr>
+        <td><strong>Order</strong></td>
+        <td><code>orders</code><br>PK: <code>id</code><br>UQ: <code>order_number</code></td>
+        <td>Zákaznická objednávka. Řízena stavovým automatem <code>OrderStatus</code> (<code>CREATED</code> $\rightarrow$ <code>RESERVED</code> $\rightarrow$ <code>PROCESSING</code> $\rightarrow$ <code>DISPATCHED</code> / <code>CANCELLED</code>).</td>
+      </tr>
+      <tr>
+        <td><strong>OrderItem</strong></td>
+        <td><code>order_items</code><br>PK: <code>id</code><br>FK: <code>order_id</code>, <code>product_id</code>, <code>warehouse_id</code></td>
+        <td>Jednotlivý řádek objednávky. <em>Obchodní pravidlo klienta:</em> Atribut <code>unit_price_at_purchase</code> fixuje cenu v okamžiku prodeje. Následná změna ceníku nesmí změnit historické objednávky.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2.4 Integritní omezení databáze (Ochrana proti chybám)</h2>
+  <p>
+    Systém nespoléhá pouze na aplikační validaci, ale vynucuje obchodní pravidla přímo na úrovni relačního schématu PostgreSQL:
+  </p>
+  <ul>
+    <li><code>chk_products_selling_price_non_negative</code>: Prodejní cena nesmí být záporná ($price \ge 0$).</li>
+    <li><code>chk_products_margin_positive</code>: Prodejní cena musí být vyšší než nákupní cena (zamezení prodeje se ztrátou).</li>
+    <li><code>chk_stock_items_quantity_non_negative</code>: <strong>Zákaz prodeje do záporu</strong> – $quantity \ge 0$.</li>
+    <li><code>chk_stock_items_reserved_le_quantity</code>: Rezervované množství nesmí převýšit fyzickou zásobu ($reserved\_quantity \le quantity$).</li>
+    <li><code>chk_orders_status_valid</code>: Stav objednávky smí nabývat pouze povolených hodnot stavového automatu.</li>
+  </ul>
+</div>
+
+<!-- STRANA 5: TŘÍVRSTVÁ ARCHITEKTURA -->
+<div class="page-break">
+  <h1>3. Třívrstvá architektura a návrh systému</h1>
+
+  <h2>3.1 Přísně jednosměrné závislosti</h2>
+  <p>
+    Aplikace důsledně ctí princip <strong>třívrstvé architektury</strong> vyžadovaný předmětem PPRO. Každá vrstva má jasně ohraničenou odpovědnost a závislosti směřují výhradně shora dolů:
+  </p>
+  
+  <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 18px; margin: 15px 0;">
+    <div style="text-align: center; font-weight: bold; color: #1e3a8a;">
+      Prezentační vrstva (REST Controllery, SPA Frontend v index.html, OpenAPI)
+    </div>
+    <div style="text-align: center; color: #2563eb; font-weight: bold; margin: 4px 0;">&darr; &nbsp; (využívá DTO přepravky a volá rozhraní služeb)</div>
+    <div style="text-align: center; font-weight: bold; color: #1e3a8a;">
+      Aplikační a byznys vrstva (Spring Services, Domain Business Rules, Validace, @Transactional)
+    </div>
+    <div style="text-align: center; color: #2563eb; font-weight: bold; margin: 4px 0;">&darr; &nbsp; (přistupuje k DB výhradně přes Spring Data JPA)</div>
+    <div style="text-align: center; font-weight: bold; color: #1e3a8a;">
+      Datová a perzistentní vrstva (JPA Entities, Repositories, PostgreSQL 16 v Dockeru)
+    </div>
+  </div>
+
+  <h2>3.2 Garance dodržení architektonických zásad</h2>
+  <ol>
+    <li>
+      <strong>Zákaz obcházení vrstev:</strong> Controllery nikdy nevolají databázi napřímo ani neobsahují SQL dotazy. Veškeré požadavky jsou delegovány na servisní rozhraní (<code>ProductService</code>, <code>OrderService</code>, <code>WarehouseService</code>).
+    </li>
+    <li>
+      <strong>Ochrana vnitřního modelu přes DTO (Data Transfer Objects):</strong> Databázové JPA entity nejsou nikdy vystaveny do REST rozhraní. Komunikace probíhá výhradně přes DTO třídy (<code>ProductResponseDto</code>, <code>OrderCreateDto</code> apod.), čímž je eliminován únik interní struktury a zamezeno cyklickým závislostem při serializaci.
+    </li>
+    <li>
+      <strong>Transakční integrita a zámky:</strong> Kritické operace rezervací zásob a split fulfillmentu jsou označeny anotací <code>@Transactional</code>. Při souběhu požadavků chrání zásoby před přepsáním optimistické zamykání JPA pomocí verze záznamu.
+    </li>
+  </ol>
+
+  <h2>3.3 Klíčová doménová byznys logika</h2>
+  
+  <h3>Dvoufázový model zásobování (Rezervace $\rightarrow$ Expedice)</h3>
+  <p>
+    Když zákazník odešle objednávku z e-shopu, systém provede atomickou kontrolu disponibilního množství ($quantity - reserved\_quantity$). Pokud je zboží dostatek, zvýší se <code>reserved_quantity</code> o objednaný počet kusů. Zboží fyzicky zůstává na regálu, ale je uzamčeno před dalšími nakupujícími. K reálnému snížení <code>quantity</code> dochází až v okamžiku expedice balíku skladníkem. Pokud je objednávka stornována, rezervace se okamžitě uvolní.
+  </p>
+
+  <h3>Split fulfillment (Objednávka rozdělená mezi sklady)</h3>
+  <p>
+    Pokud zákazník požaduje např. 14 kusů bukových kostek, ale Hlavní sklad v Hradci Králové má volných pouze 10 kusů a sklad v Třebechovicích 4 kusy, systém objednávku nezamítne. Servisní třída <code>OrderServiceImpl</code> alokuje 10 kusů z Hradce a zbývající 4 kusy z Třebechovic. Vytvoří se dvě položky <code>OrderItem</code> vázané na příslušné sklady, čímž je zákazník uspokojen a skladník má přesný přehled o místech výdeje.
+  </p>
+</div>
+
+<!-- STRANA 6: TECHNOLOGICKÝ STACK -->
+<div class="page-break">
+  <h1>4. Použité technologie a zdůvodnění volby</h1>
+  <p>
+    Dle oddílu 4 a 5 směrnice PPRO byly technologie zvoleny s důrazem na robustnost, typovou bezpečnost, reprodukovatelnost v Dockeru a jednoduchost nasazení:
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width: 28%;">Technologie</th>
+        <th>Zdůvodnění volby pro semestrální projekt</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Java 21 (LTS)</strong></td>
+        <td>Moderní standard jazyka Java využívaný v předchozích předmětech; nabízí silný typový systém, Pattern Matching, Recordy a vysokou spolehlivost podnikového kódu.</td>
+      </tr>
+      <tr>
+        <td><strong>Spring Boot 3.3</strong></td>
+        <td>De facto průmyslový standard pro třívrstvé podnikové aplikace; poskytuje bezkonkurenční ekosystém pro Dependency Injection, REST API, validace a transakční správu.</td>
+      </tr>
+      <tr>
+        <td><strong>Spring Data JPA & Hibernate</strong></td>
+        <td>Výkonný ORM framework umožňující deklarativní definici repozitářů bez nutnosti psaní náchylného JDBC kódu, s plnou podporou transakcí a lazy-loadingu.</td>
+      </tr>
+      <tr>
+        <td><strong>PostgreSQL 16</strong></td>
+        <td>Plnohodnotný produkční relační databázový systém běžící v oficiálním Docker kontejneru; garantuje ACID vlastnosti, integritní CHECK omezení a stejné chování u studenta i zkoušejícího.</td>
+      </tr>
+      <tr>
+        <td><strong>Flyway Migration</strong></td>
+        <td>Nástroj pro verzování databázového schématu přímo v repozitáři; zajišťuje automatickou a bezchybnou inicializaci tabulek a seedových dat při spuštění.</td>
+      </tr>
+      <tr>
+        <td><strong>Docker & Docker Compose</strong></td>
+        <td>Standard pro kontejnerizaci splňující podmínku zadání; umožňuje kompletní spuštění databáze i aplikačního backendu jediným příkazem bez lokálních instalací.</td>
+      </tr>
+      <tr>
+        <td><strong>Vanilla JS / HTML5 / CSS3 (SPA)</strong></td>
+        <td>Čistý frontend bez nutnosti instalace Node.js, Webpacku či npm; soubory jsou servírovány přímo ze static resources Spring Bootu, což garantuje nulovou režii a okamžitý start.</td>
+      </tr>
+      <tr>
+        <td><strong>SpringDoc OpenAPI (Swagger)</strong></td>
+        <td>Automatické generování interaktivní dokumentace REST rozhraní dle specifikace OpenAPI 3 na adrese <code>/swagger-ui.html</code> pro vývojáře a testování.</td>
+      </tr>
+      <tr>
+        <td><strong>JUnit 5 & MockMvc</strong></td>
+        <td>Moderní framework pro automatizované testování; umožňuje izolované unit testy doménových invariantů i integrační testy REST kontrolerů proti aplikačnímu kontextu.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4.1 Čistý firemní vzhled bez generických prvků</h2>
+  <p>
+    V souladu se Zásadou 9 projektových pravidel a požadavkem klienta (Z1) bylo klientské webové rozhraní navrženo s důrazem na seriózní firemní identitu:
+  </p>
+  <ul>
+    <li><strong>Žádné emotikony / emoji:</strong> V tabulkách, navigaci ani stavových odznacích nefigurují žádné emoji (nahrazeno seriózními textovými štítky).</li>
+    <li><strong>Žádné pulzující tečky:</strong> Odstraněny animované pulzující tečky online/offline stavů a ozdobné tečky v záhlaví.</li>
+    <li><strong>Skrytý vývojářský žargon:</strong> Odkazy na Swagger API byly přesunuty ze skladnického menu pouze na standardní vývojářskou URL.</li>
+  </ul>
+</div>
+
+<!-- STRANA 7: SPUŠTĚNÍ SYSTÉMU KROK ZA KROKEM -->
+<div class="page-break">
+  <h1>5. Postup nasazení a spuštění krok za krokem</h1>
+  <p>
+    Aplikace je navržena tak, aby její spuštění zvládl kdokoliv, kdo projekt nikdy předtím neviděl, bez nutnosti ruční konfigurace.
+  </p>
+
+  <h2>5.1 Prerekvizity prostředí</h2>
+  <ul>
+    <li><strong>Git</strong> pro naklonování repozitáře.</li>
+    <li><strong>Docker Desktop</strong> (nebo Docker Engine s doplňkem Docker Compose) pro Windows, macOS či Linux.</li>
+    <li>Není vyžadována lokální instalace Javy, Mavenu, PostgreSQL ani Node.js – vše běží plně v kontejnerech.</li>
+  </ul>
+
+  <h2>5.2 Spuštění aplikace (Postup krok za krokem)</h2>
+  <ol>
+    <li>Naklonujte repozitář z GitHubu a přejděte do kořenového adresáře projektu:
+      <pre>git clone https://github.com/Miskoslav/PPRO.git
+cd PPRO</pre>
+    </li>
+    <li>Spusťte kompletní aplikační kompozici (PostgreSQL databáze + Spring Boot backend + frontend):
+      <pre>docker compose up --build</pre>
+    </li>
+    <li>Docker Compose provede multi-stage build: zkompiluje backend v čistém Maven image, vytvoří odlehčený běhový image s Eclipse Temurin JRE 21 a nastartuje databázi PostgreSQL 16 na dedikované bridge síti <code>drevenka-network</code>.</li>
+    <li>Kontejnery jsou vybaveny automatickým healthcheckem (<code>pg_isready</code> u databáze a dotaz na <code>/api/v1/health</code> přes <code>curl</code> u backendu). Jakmile je systém připraven, v logu se zobrazí hlášení:
+      <pre>Started WarehouseApplication in 3.42 seconds (process running for 3.9)</pre>
+    </li>
+  </ol>
+
+  <h2>5.3 Adresy služeb a přístupové body</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Služba / Rozhraní</th>
+        <th>URL adresa</th>
+        <th>Popis a přístupové údaje</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Klientské webové UI (SPA)</strong></td>
+        <td><code>http://localhost:8080/</code></td>
+        <td>Hlavní přehledový dashboard skladníka, katalog hraček, sklady, doobjednávky, formulář objednávek.</td>
+      </tr>
+      <tr>
+        <td><strong>REST API Endpointy</strong></td>
+        <td><code>http://localhost:8080/api/v1/products</code><br><code>http://localhost:8080/api/v1/orders</code></td>
+        <td>Základní JSON API rozhraní pro správu sortimentu a objednávek.</td>
+      </tr>
+      <tr>
+        <td><strong>Healthcheck aplikace</strong></td>
+        <td><code>http://localhost:8080/api/v1/health</code></td>
+        <td>Diagnostický endpoint monitorující běh systému.</td>
+      </tr>
+      <tr>
+        <td><strong>OpenAPI / Swagger UI</strong></td>
+        <td><code>http://localhost:8080/swagger-ui.html</code></td>
+        <td>Vývojářská konzole s popisem a možností interaktivního testování všech REST metod.</td>
+      </tr>
+      <tr>
+        <td><strong>PostgreSQL Databáze</strong></td>
+        <td><code>localhost:5432</code></td>
+        <td>Databáze: <code>drevenka_db</code>, Uživatel: <code>drevenka_user</code>, Heslo: <code>drevenka_secret</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>5.4 Ukončení aplikace</h2>
+  <pre>docker compose down</pre>
+  <p><em>Poznámka:</em> Pro kompletní vyčištění včetně databázových volumů použijte <code>docker compose down -v</code>.</p>
+</div>
+
+<!-- STRANA 8: AUTOMATIZOVANÉ TESTY -->
+<div class="page-break">
+  <h1>6. Automatizované testy a verifikace funkčnosti</h1>
+  <p>
+    Projekt disponuje rozsáhlou testovací sadou čítající <strong>28 automatizovaných testů</strong>, které garantují dodržení veškeré doménové logiky a ochranu před regresními chybami.
+  </p>
+
+  <h2>6.1 Rozdělení testovací sady</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Testovací třída</th>
+        <th>Typ testu</th>
+        <th>Počet</th>
+        <th>Ověřované funkční scénáře</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ProductServiceTest</strong></td>
+        <td>Unit testy</td>
+        <td>10 testů</td>
+        <td>Ověření unikátnosti SKU, kalkulace obchodních marží, soft-delete mechanika, operace doobjednání (<code>orderSupply</code>), <strong>striktní zákaz naskladnění více kusů než bylo objednáno</strong> (<code>receiveSupply</code>) a detekce zásob blížících se k minimální bezpečné mezi.</td>
+      </tr>
+      <tr>
+        <td><strong>OrderServiceTest</strong></td>
+        <td>Unit testy</td>
+        <td>6 testů</td>
+        <td>Dvoufázová rezervace zásob, odmítnutí prodeje neexistujícího zboží (422), fixace prodejní ceny položky v objednávce, <strong>Split fulfillment napříč dvěma sklady</strong> (Hradec + Třebechovice) a uvolnění rezervací při stornu objednávky.</td>
+      </tr>
+      <tr>
+        <td><strong>ProductControllerTest</strong></td>
+        <td>Integrační (MockMvc)</td>
+        <td>11 testů</td>
+        <td>Kompletní ověření REST kontroleru, mapování HTTP statusů (200, 201, 400, 404, 409, 422), validační hlášení při chybných vstupech, doobjednávkový endpoint.</td>
+      </tr>
+      <tr>
+        <td><strong>WarehouseApplicationTests</strong></td>
+        <td>Integrační test</td>
+        <td>1 test</td>
+        <td>Úspěšný start celého Spring Boot aplikačního kontextu a ověření správné konfigurace všech beans.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>6.2 Jak testy spustit</h2>
+  <p>
+    Testovací sadu lze spustit z kořenového adresáře backendu příkazem:
+  </p>
+  <pre>cd backend
+mvn test</pre>
+  <p>Výstupem úspěšného běhu je přehled:</p>
+  <pre>[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS</pre>
+
+  <h2>6.3 Klíčové testované doménové invarianty</h2>
+  <ul>
+    <li><code>shouldRejectOrderWhenStockIsInsufficient()</code>: Pokud zákazník žádá 50 kusů hračky, ale oba sklady dohromady mají pouze 30 kusů, objednávka je okamžitě odmítnuta s kódem 422 a žádná zásoba se nezablokuje.</li>
+    <li><code>shouldSplitFulfillmentBetweenWarehouses()</code>: Pokud je požadavek na 15 kusů a Hradec má 10 a Třebechovice 10, systém správně odečte 10 z Hradce a 5 z Třebechovic a vytvoří odpovídající řádky v objednávce.</li>
+    <li><code>shouldRejectReceiveSupplyExceedingIncomingQuantity()</code>: Nelze naskladnit 40 kusů, pokud bylo u dodavatele doobjednáno pouze 5 kusů.</li>
+  </ul>
+</div>
+
+<!-- STRANA 9: PROTOKOL O ZACYKLENÍ AGENTA -->
+<div class="page-break">
+  <h1>7. Protokol o zacyklení agenta (Povinná reflexe)</h1>
+  
+  <div class="callout warning">
+    <div class="callout-title">Reflexe samostatné práce v souladu s oddílem 5, bod 8 zadání PPRO</div>
+    Tato kapitola dokumentuje konkrétní situaci z vývoje, kdy AI agent (Google Antigravity) dodal chybné a nelogické řešení porušující obchodní pravidla, jak byla chyba studentem při testování odhalena a jakým způsobem ji student promptováním rozsekl.
+  </div>
+
+  <h2>7.1 Kontext a zadání operace</h2>
+  <p>
+    V rámci rozšiřování systému byla implementována podpora pro doobjednávání zboží u výrobce a jeho následné naskladnění (operace <code>receiveSupply</code>). Zboží má nejprve stav „Na cestě“ (evidováno v atributu <code>incomingQuantity</code> na kartě hračky) a po doručení zásilky na sklad má skladník zadat počet kusů, které dorazily. Tím se kusy převedou do fyzické zásoby skladu a poníží se množství na cestě.
+  </p>
+
+  <h2>7.2 Chyba v návrhu a selhání agenta</h2>
+  <p>
+    Agent vygeneroval servisní metodu i klientský formulář pro příjem zboží. V implementaci však zcela chyběla kontrola horní meze: agent dovolil skladníkovi zadat do formuláře libovolné číslo bez ohledu na to, kolik kusů bylo skutečně objednáno.
+  </p>
+  <p>
+    Když student prováděl manuální revizi a testování funkčnosti aplikace v prohlížeči, narazil na nelogické chování: u hračky bylo objednáno <strong>5 kusů</strong>, ale ve formuláři pro naskladnění bylo možné zadat číslo <strong>40</strong>. Aplikace sice situaci vyhodnotila tím, že objednávku zrušila, ale formulář i backend vůbec umožnily takto nesmyslný požadavek odeslat a zpracovat. V evidenci tak vznikaly nekontrolované stavy, což odporovalo zadání klienta.
+  </p>
+
+  <h2>7.3 Zacyklení agenta a vyčerpání tokenů</h2>
+  <p>
+    Když student agentovi situaci popsal obecně, agent se pokoušel problém opravit generováním rozsáhlých úprav, v nichž se zacyklil. Místo jednoduché validace začal přepisovat stavový automat objednávek a generovat kaskádovité změny v několika souborech naráz. V tomto zacyklení agent vyplýtval celý kontext/tokeny a práce se samovolně přerušila chybou vyčerpání limitu konverzace, aniž by byl problém vyřešen.
+  </p>
+
+  <h2>7.4 Rozseknutí situace studentem</h2>
+  <p>
+    Student musel zacyklení rozseknout tím, že zahájil novou instanci a zformuloval naprosto přesný, konkrétní prompt popisující jádro chyby i požadované chování:
+  </p>
+  <div style="background: #e0e7ff; border-left: 4px solid #3730a3; padding: 10px 14px; font-style: italic; margin: 10px 0; font-size: 9.5pt;">
+    „Narazil jsem na chybu: když mi probíhá objednávka, mohu naskladnit více kusů, než bylo objednáno (příklad: objednal jsem 5 ks, ale naskladním 40). Zajisti, aby nebylo možné naskladnit více kusů, než kolik je skutečně objednáno na cestě – doplň validaci na backendu (HTTP 422) a v HTML formuláři nastav maximální limit.“
+  </div>
+  <p>
+    Díky tomuto přímému zásahu studenta agent konečně implementoval správné řešení:
+  </p>
+  <ol>
+    <li><strong>Tvrdá validace v servisní vrstvě:</strong> Pokud <code>dto.getQuantity() > product.getIncomingQuantity()</code>, vyhodí se <code>BusinessValidationException</code> se stavovým kódem HTTP 422.</li>
+    <li><strong>Omezení v uživatelském rozhraní:</strong> V HTML dialogu byl do vstupního pole nastaven atribut <code>max</code> a nápověda pro skladníka.</li>
+    <li><strong>Automatizovaný test:</strong> Byl přidán unit test <code>shouldRejectReceiveSupplyExceedingIncomingQuantity()</code>, který toto pravidlo trvale chrání.</li>
+  </ol>
+</div>
+
+<!-- STRANA 10: PŘIZNÁNÍ PRÁCE S AI A ZÁVĚR -->
+<div>
+  <h1>8. Přiznání práce s AI a metodika vývoje</h1>
+  
+  <h2>8.1 Deklarace použití nástrojů (Dle oddílu 5, bod 9)</h2>
+  <p>
+    V souladu se zadáním a pravidly předmětu PPRO prohlašuji, že při vývoji semestrálního projektu byl použit agentní AI nástroj <strong>Google Antigravity</strong> (využívající model Gemini). Nástroj byl využíván jako programovací agent řízený výhradně instrukcemi a prompty studenta.
+  </p>
+
+  <h2>8.2 Rozdělení rolí mezi studentem a AI agentem</h2>
+  <ul>
+    <li><strong>Role studenta (Zadávání, testování a revize):</strong> Student vystupoval v roli architekta a testera. Definoval požadavky podle zadání B, psal prompty pro agenta, prováděl manuální funkční testování aplikace v prohlížeči a revizi vygenerovaného kódu. Na základě odhalených nedostatků zadával upřesňující prompty a řídil postup prací.</li>
+    <li><strong>Role AI agenta (Generování kódu a konfigurací):</strong> Agent na základě promptů generoval DDL migrace Flyway, strukturu JPA entit, DTO třídy, servisní metody, REST controllery, šablony testů v JUnit 5 a HTML/CSS rozhraní.</li>
+  </ul>
+
+  <h2>8.3 Metodika verifikace výstupů studentem</h2>
+  <p>
+    Za odevzdaný projekt <strong>plně ručí student</strong>. Veškeré výstupy vygenerované agentem byly průběžně ověřovány:
+  </p>
+  <ol>
+    <li><strong>Manuální funkční testování v prohlížeči:</strong> Student po každé fázi procházel veškeré uživatelské toky (vytvoření hračky, výběr kategorií, zobrazení inventáře skladů, doobjednání, vytvoření objednávky zákazníka). Právě při tomto testování student odhalil chyby (např. možnost naskladnit 40 ks místo 5 ks nebo neergonomické scrollování ve formuláři objednávky).</li>
+    <li><strong>Automatizované testy (28 testů):</strong> Aplikační invarianty (dvoufázová rezervace, split fulfillment, fixace cen, validace naskladnění) jsou pokryty unit a integračními testy v Mavenu.</li>
+    <li><strong>Kontejnerový běh:</strong> Ověření kompletního sestavení a běhu aplikace v Docker Compose (`docker compose up --build`).</li>
+    <li><strong>Znalost kódu:</strong> Student je seznámen se strukturou všech tříd a schématem databáze a je připraven jakoukoliv část aplikace u ústní obhajoby vysvětlit a provést zadanou drobnou úpravu.</li>
+  </ol>
+
+  <h2>8.4 Závěr</h2>
+  <p>
+    Výsledná aplikace představuje plně funkční, spolehlivý a moderní skladový systém, který stoprocentně řeší reálné problémy klienta Dřevěnka s.r.o. Odstraňuje chaos v Excelu, zamezuje prodeji do záporu, zajišťuje precizní dohledatelnost materiálových pohybů napříč sklady v Hradci Králové a Třebechovicích a splňuje veškeré požadavky povinného minima předmětu Pokročilé programování na FIM UHK.
+  </p>
+</div>
+
+</body>
+</html>
